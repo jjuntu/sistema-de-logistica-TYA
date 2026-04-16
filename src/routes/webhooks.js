@@ -94,21 +94,35 @@ router.post('/woocommerce', async (req, res) => {
 // ─────────────────────────────────────────────
 router.post('/tiendanube', async (req, res) => {
   try {
-    const event = req.body.event || req.body.topic;
-    const store_id = req.body.store_id || req.body.store;
+    let body;
+    const rawBody = req.body;
+    
+    // TN puede mandar el body encriptado o como JSON
+    if (typeof rawBody === 'string' || Buffer.isBuffer(rawBody)) {
+      try {
+        const decoded = Buffer.from(rawBody.toString(), 'base64');
+        body = JSON.parse(decoded.toString('utf8'));
+      } catch(e) {
+        body = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
+      }
+    } else {
+      body = rawBody;
+    }
+
+    const event = body.event || body.topic;
+    const store_id = body.store_id || body.store;
     logger.info(`Webhook TN recibido — event: ${event}, store: ${store_id}`);
 
     await prisma.webhookLog.create({
-      data: { fuente: 'tiendanube', payload: req.body }
+      data: { fuente: 'tiendanube', payload: body }
     });
 
-    // Solo procesar órdenes pagadas
     if (!['order/paid', 'order/packed', 'order/fulfilled'].includes(event)) {
       return res.sendStatus(200);
     }
 
     await agregarTarea('procesar-orden-tn', {
-      datos: req.body,
+      datos: body,
       fuente: 'TIENDANUBE'
     });
 
@@ -118,7 +132,6 @@ router.post('/tiendanube', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 // ─────────────────────────────────────────────
 // ENDPOINT DE PRUEBA (para verificar que el server responde)
 // ML te pide verificar la URL con un GET antes de guardarla
