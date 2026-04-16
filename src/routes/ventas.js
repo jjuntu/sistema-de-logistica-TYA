@@ -6,7 +6,7 @@ const { procesarOrdenNormalizada } = require('../services/procesadorOrdenes');
 
 const { generarRemitoPDF } = require('../services/remitoPdf');
 
-
+const prisma = new PrismaClient();
 // GET /api/ventas — listar con filtros
 router.get('/', async (req, res) => {
   try {
