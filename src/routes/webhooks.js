@@ -95,19 +95,23 @@ router.post('/woocommerce', async (req, res) => {
 router.post('/tiendanube', async (req, res) => {
   try {
     let body;
-    const rawBody = req.body;
-    
-    // TN puede mandar el body encriptado o como JSON
-    if (typeof rawBody === 'string' || Buffer.isBuffer(rawBody)) {
-      try {
-        const decoded = Buffer.from(rawBody.toString(), 'base64');
-        body = JSON.parse(decoded.toString('utf8'));
-      } catch(e) {
-        body = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
-      }
-    } else {
-      body = rawBody;
-    }
+const rawBody = req.body;
+
+try {
+  if (Buffer.isBuffer(rawBody)) {
+    body = JSON.parse(rawBody.toString('utf8'));
+  } else if (typeof rawBody === 'string') {
+    body = JSON.parse(rawBody);
+  } else if (rawBody && typeof rawBody === 'object' && rawBody.type === 'Buffer') {
+    body = JSON.parse(Buffer.from(rawBody.data).toString('utf8'));
+  } else {
+    body = rawBody;
+  }
+} catch(e) {
+  body = rawBody;
+}
+
+logger.info('TN body completo: ' + JSON.stringify(body).substring(0, 200));
 
 logger.info('TN body completo: ' + JSON.stringify(body).substring(0, 200));
 
