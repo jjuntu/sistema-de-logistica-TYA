@@ -109,6 +109,8 @@ router.post('/tiendanube', async (req, res) => {
       body = rawBody;
     }
 
+logger.info('TN body completo: ' + JSON.stringify(body).substring(0, 200));
+
     const event = body.event || body.topic;
     const store_id = body.store_id || body.store;
     logger.info(`Webhook TN recibido — event: ${event}, store: ${store_id}`);
