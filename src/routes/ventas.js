@@ -4,7 +4,8 @@ const { PrismaClient } = require('@prisma/client');
 const { motorTransporte } = require('../services/motorTransporte');
 const { procesarOrdenNormalizada } = require('../services/procesadorOrdenes');
 
-const prisma = new PrismaClient();
+const { generarRemitoPDF } = require('../services/remitoPdf');
+
 
 // GET /api/ventas — listar con filtros
 router.get('/', async (req, res) => {
@@ -37,8 +38,52 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/ventas/limpiar-pruebas — TEMPORAL, borrar después
-router.get('/limpiar-pruebas', async (req, res) => {
+// GET /api/ventas/:id/remito-pdf — genera PDF del remito
+router.get('/:id/remito-pdf', async (req, res) => {
+  try {
+    const venta = await prisma.venta.findUnique({
+      where: { id: req.params.id },
+      include: { items: true }
+    });
+    if (!venta) return res.status(404).json({ error: 'Venta no encontrada' });
+
+    const fecha = new Date(venta.fecha);
+    const fechaStr = fecha.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+    const ventaData = {
+      numero:           venta.numero,
+      fecha:            fechaStr,
+      vendedor:         venta.vendedor || 'SISTEMA',
+      unidad:           venta.unidad || 'ABCTECHOS',
+      clienteNombre:    venta.clienteNombre,
+      clienteEmpresa:   venta.clienteEmpresa,
+      clienteCuit:      venta.clienteDocumento,
+      clienteCategoria: venta.clienteCategoria || 'CF',
+      clienteTel:       venta.clienteTel,
+      dirCalle:         venta.dirCalle,
+      dirLocalidad:     venta.dirLocalidad,
+      dirProvincia:     venta.dirProvincia,
+      dirCP:            venta.dirCP,
+      transporteNombre: venta.transporteNombre,
+      notas:            venta.notas,
+      items: venta.items.map(i => ({
+        codigo:      '',
+        descripcion: i.descripcion,
+        cantidad:    i.cantidad,
+        unidad:      i.unidad || 'Unidad',
+      }))
+    };
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="remito-${venta.numero}.pdf"`);
+    generarRemitoPDF(ventaData, res);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/ventas/:id
+router.get('/:id', async (req, res) => {router.get('/limpiar-pruebas', async (req, res) => {
   try {
     const ids = (await prisma.venta.findMany({
       where: { numero: { in: ['R0001','R0002','R0003'] } },
