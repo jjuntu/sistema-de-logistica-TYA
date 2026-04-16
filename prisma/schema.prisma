@@ -1,0 +1,136 @@
+// Schema de base de datos — ABCTechos Logística
+// Base de datos: PostgreSQL (Railway provee una gratis)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Venta {
+  id              String   @id @default(cuid())
+  numero          String   @unique  // R0001, R0002, etc.
+  fecha           DateTime @default(now())
+  
+  // Origen de la venta
+  canal           Canal
+  canalExternoId  String?  // order_id de ML, order ID de WooCommerce, etc.
+  unidad          Unidad
+  
+  // Cliente
+  clienteNombre   String
+  clienteEmpresa  String?
+  clienteEmail    String?
+  clienteTel      String?
+  clienteDocumento String?
+  
+  // Dirección de entrega
+  dirCalle        String
+  dirLocalidad    String
+  dirProvincia    String
+  dirCP           String?
+  
+  // Logística
+  transporteId    String?
+  transporteNombre String?
+  transporteCosto Float?
+  transporteNota  String?
+  
+  // Estado
+  estado          EstadoVenta @default(PENDIENTE)
+  
+  // Tango Factura
+  tangoRemitoId   String?
+  tangoFacturaId  String?
+  tangoEnviado    Boolean  @default(false)
+  
+  // Contenido
+  items           ItemVenta[]
+  total           Float
+  notas           String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Log de eventos
+  eventos         EventoVenta[]
+
+  @@index([canal])
+  @@index([estado])
+  @@index([fecha])
+  @@index([canalExternoId])
+}
+
+model ItemVenta {
+  id          String  @id @default(cuid())
+  ventaId     String
+  venta       Venta   @relation(fields: [ventaId], references: [id])
+  descripcion String
+  cantidad    Float
+  unidad      String  @default("un")
+  precioUnit  Float
+  total       Float
+}
+
+model EventoVenta {
+  id        String   @id @default(cuid())
+  ventaId   String
+  venta     Venta    @relation(fields: [ventaId], references: [id])
+  tipo      String   // CREADA, DESPACHADA, ENTREGADA, TANGO_ENVIADO, etc.
+  detalle   String?
+  createdAt DateTime @default(now())
+}
+
+model Transportista {
+  id      String   @id @default(cuid())
+  nombre  String
+  tel     String?
+  web     String?
+  email   String?
+  wpp     String?
+  notas   String?
+  activo  Boolean  @default(true)
+  zonas   String[] // Array de provincias
+  tipos   String[] // Tipos de carga
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WebhookLog {
+  id        String   @id @default(cuid())
+  fuente    String   // mercadolibre, woocommerce, tiendanube
+  payload   Json
+  procesado Boolean  @default(false)
+  error     String?
+  createdAt DateTime @default(now())
+}
+
+model Contador {
+  id    String @id @default("remito_counter")
+  valor Int    @default(1)
+}
+
+enum Canal {
+  MERCADOLIBRE
+  WOOCOMMERCE
+  TIENDANUBE
+  WHATSAPP
+  LOCAL
+  WEB
+}
+
+enum Unidad {
+  ABCTECHOS
+  ACEROINOXIDABLES
+}
+
+enum EstadoVenta {
+  PENDIENTE
+  PREPARANDO
+  TRANSITO
+  ENTREGADO
+  CANCELADO
+}
