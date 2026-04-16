@@ -1,7 +1,6 @@
 const axios = require('axios');
 const { PrismaClient } = require('@prisma/client');
-const logger = require('./logger');
-
+const logger = require('../services/logger');
 const prisma = new PrismaClient();
 
 const TANGO_BASE_URL = 'https://www.tangofactura.com/Services/Facturacion';
