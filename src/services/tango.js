@@ -15,16 +15,14 @@ let cachedToken = null;
 let tokenExpiry = null;
 
 // ─────────────────────────────────────────────
-// Categorías impositivas Tango Factura
-// 1 = Responsable Inscripto
-// 4 = Consumidor Final
-// 6 = Monotributista
+// Categorías impositivas
+// 1 = Responsable Inscripto | 4 = Consumidor Final | 6 = Monotributista
 // ─────────────────────────────────────────────
 function resolverCategoriaImpositiva(venta) {
   const cat = venta.categoriaImpositiva || venta.clienteCategoria;
   if (!cat) {
-    if (venta.clienteCuit && venta.clienteEmpresa) return 1; // tiene CUIT + empresa → RI
-    return 4; // fallback CF
+    if (venta.clienteCuit && venta.clienteEmpresa) return 1;
+    return 4;
   }
   const mapa = {
     'RI': 1, 'RESPONSABLE_INSCRIPTO': 1, 'RESPONSABLE INSCRIPTO': 1, '1': 1,
@@ -39,7 +37,7 @@ function resolverLetra(categoriaImpositiva) {
   return categoriaImpositiva === 1 ? 'A' : 'B';
 }
 
-// 80 = CUIT | 96 = DNI | 99 = Sin identificar (CF sin datos)
+// 80 = CUIT | 96 = DNI | 99 = Sin identificar
 function resolverTipoDocumento(venta, categoriaImpositiva) {
   if (venta.clienteCuit) return 80;
   if (venta.clienteDni)  return 96;
@@ -53,10 +51,16 @@ function resolverNroDocumento(venta) {
   return '0';
 }
 
+// Perfil según empresa/canal
+// 22749 = ABC TECHOS | 22750 = ACEROS INOXIDABLES
+function resolverPerfilComprobante(venta) {
+  const canal = (venta.canal || '').toUpperCase();
+  if (canal === 'WOOCOMMERCE' || canal === 'ABC' || canal === 'ABCTECHOS') return 22749;
+  return 22750;
+}
+
 // ─────────────────────────────────────────────
 // TOKEN
-// SDK PHP usa /Provisioning/GetAuthToken con form-encoded UserName+Password
-// y devuelve el token como string con comillas, ej: "abc123"
 // ─────────────────────────────────────────────
 async function obtenerToken() {
   const publicKey = process.env.TANGO_PUBLIC_KEY;
@@ -77,10 +81,8 @@ async function obtenerToken() {
     { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 15000 }
   );
 
-  // El SDK PHP hace: str_replace('"', '', $result)  → limpia comillas del string
   const raw   = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
   const token = raw.replace(/"/g, '').trim();
-
   if (!token) throw new Error('No se recibió token: ' + raw);
 
   cachedToken = token;
@@ -90,59 +92,129 @@ async function obtenerToken() {
 }
 
 // ─────────────────────────────────────────────
-// BUILD PAYLOAD — form-urlencoded flat object
-// Arrays van como: DetallesMovimiento[0].Campo = valor
+// HELPER: aplanar items para form-urlencoded
 // ─────────────────────────────────────────────
-function buildTangoPayload(venta, token) {
-  const categoriaImpositiva = resolverCategoriaImpositiva(venta);
-  const letra               = resolverLetra(categoriaImpositiva);
-  const tipoDoc             = resolverTipoDocumento(venta, categoriaImpositiva);
-  const nroDoc              = resolverNroDocumento(venta);
-
-  const nombreCliente = venta.clienteEmpresa || venta.clienteNombre || 'Sin nombre';
-  const direccion     = [venta.dirCalle, venta.dirLocalidad].filter(Boolean).join(', ') || 'Sin dirección';
-
-  const data = {
-    // Autenticación
-    ApplicationPublicKey:      process.env.TANGO_PUBLIC_KEY,
-    UserIdentifier:            process.env.TANGO_USER_ID,
-    Token:                     token,
-
-    // Comprobante
-    Letra:                     letra,
-    FechaComprobante:          new Date(venta.fecha || Date.now()).toISOString(),
-
-    // Cliente — nombre correcto de campos según SDK: ClienteNumeroDocumento (no NroDocumento)
-    ClienteNombre:             nombreCliente,
-    ClienteDireccion:          direccion,
-    ClienteTipoDocumento:      tipoDoc,
-    ClienteNumeroDocumento:    nroDoc,       // ← campo correcto según SDK PHP
-    CategoriaImpositivaCodigo: categoriaImpositiva,
-
-    // Observaciones — campo correcto es "Observacion" (sin 'es') según SDK
-    Observacion: [
-      venta.notas,
-      venta.transporteNombre ? `Transporte: ${venta.transporteNombre}` : null,
-      `Canal: ${venta.canal}`,
-      `Ref: ${venta.numero}`,
-    ].filter(Boolean).join(' | '),
-  };
-
-  // Aplanar items como DetallesMovimiento[0].Campo=valor (formato SDK)
-  const items = venta.items || [];
-  items.forEach((item, i) => {
+function aplanarItems(items) {
+  const data = {};
+  (items || []).forEach((item, i) => {
     data[`DetallesMovimiento[${i}].ProductoNombre`]      = item.descripcion || item.nombre || 'Producto';
     data[`DetallesMovimiento[${i}].ProductoDescripcion`] = item.descripcion || item.nombre || 'Producto';
     data[`DetallesMovimiento[${i}].Cantidad`]            = Number(item.cantidad) || 1;
     data[`DetallesMovimiento[${i}].Precio`]              = Number(item.precioUnit || item.precio) || 0;
     data[`DetallesMovimiento[${i}].Bonificacion`]        = 0;
   });
-
   return data;
 }
 
 // ─────────────────────────────────────────────
-// ENVIAR A TANGO
+// HELPER: ejecutar llamada a Tango
+// ─────────────────────────────────────────────
+async function ejecutarTango(metodo, payload) {
+  const token = await obtenerToken();
+  const data  = {
+    ApplicationPublicKey: process.env.TANGO_PUBLIC_KEY,
+    UserIdentifier:       process.env.TANGO_USER_ID,
+    Token:                token,
+    ...payload,
+  };
+
+  const response = await axios.post(
+    `${TANGO_BASE_URL}/${metodo}`,
+    new URLSearchParams(data).toString(),
+    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 15000 }
+  );
+
+  const result = response.data;
+  if (result?.CodigoError !== 0 && result?.Error?.length) {
+    const msgs = result.Error.map(e => e.Mensaje).join(' | ');
+    throw new Error(msgs);
+  }
+  return result?.Data;
+}
+
+// ─────────────────────────────────────────────
+// CREAR REMITO EN TANGO
+// ─────────────────────────────────────────────
+async function crearRemitoTango(venta, token) {
+  const nombreCliente = venta.clienteEmpresa || venta.clienteNombre || 'Sin nombre';
+  const direccion     = [venta.dirCalle, venta.dirLocalidad].filter(Boolean).join(', ') || 'Sin dirección';
+  const perfilId      = resolverPerfilComprobante(venta);
+
+  logger.info(`Creando remito Tango para ${venta.numero}...`);
+
+  const payload = {
+    ClienteNombre:    nombreCliente,
+    ClienteDireccion: direccion,
+    FechaComprobante: new Date(venta.fecha || Date.now()).toISOString(),
+    PerfilComprobanteID: perfilId,
+    Observacion: [`Ref: ${venta.numero}`, `Canal: ${venta.canal}`, venta.notas].filter(Boolean).join(' | '),
+    ...aplanarItems(venta.items),
+  };
+
+  const data = await ejecutarTango('CrearRemito', payload);
+  const remitoId = data?.MovimientoId || data?.MovimientoID || 'OK';
+  logger.info(`Remito Tango creado — ID: ${remitoId}`);
+
+  await prisma.eventoVenta.create({
+    data: { ventaId: venta.id, tipo: 'TANGO_REMITO', detalle: `Remito ID ${remitoId}` },
+  });
+
+  return remitoId;
+}
+
+// ─────────────────────────────────────────────
+// CREAR FACTURA EN TANGO
+// ─────────────────────────────────────────────
+async function crearFacturaTango(venta, remitoId) {
+  const categoriaImpositiva = resolverCategoriaImpositiva(venta);
+  const letra               = resolverLetra(categoriaImpositiva);
+  const tipoDoc             = resolverTipoDocumento(venta, categoriaImpositiva);
+  const nroDoc              = resolverNroDocumento(venta);
+  const perfilId            = resolverPerfilComprobante(venta);
+  const nombreCliente       = venta.clienteEmpresa || venta.clienteNombre || 'Sin nombre';
+  const direccion           = [venta.dirCalle, venta.dirLocalidad].filter(Boolean).join(', ') || 'Sin dirección';
+
+  const catLabel = { 1: 'RI', 4: 'CF', 6: 'Mono' }[categoriaImpositiva] || '?';
+  logger.info(`Creando factura Tango para ${venta.numero} (Factura ${letra} / ${catLabel})...`);
+
+  const payload = {
+    Letra:                     letra,
+    FechaComprobante:          new Date(venta.fecha || Date.now()).toISOString(),
+    ClienteNombre:             nombreCliente,
+    ClienteDireccion:          direccion,
+    ClienteTipoDocumento:      tipoDoc,
+    ClienteNumeroDocumento:    nroDoc,
+    CategoriaImpositivaCodigo: categoriaImpositiva,
+    PerfilComprobanteID:       perfilId,
+    // Vincular con el remito si se creó
+    ...(remitoId && remitoId !== 'OK' ? { MovimientoReferenciaID: remitoId } : {}),
+    Observacion: [
+      venta.notas,
+      venta.transporteNombre ? `Transporte: ${venta.transporteNombre}` : null,
+      `Canal: ${venta.canal}`,
+      `Ref: ${venta.numero}`,
+    ].filter(Boolean).join(' | '),
+    ...aplanarItems(venta.items),
+  };
+
+  const data    = await ejecutarTango('CrearFactura', payload);
+  const facturaId = data?.MovimientoId || data?.MovimientoID || 'OK';
+  logger.info(`Factura Tango creada — ID: ${facturaId}`);
+
+  await prisma.venta.update({
+    where: { id: venta.id },
+    data:  { tangoRemitoId: String(facturaId), tangoEnviado: true },
+  });
+
+  await prisma.eventoVenta.create({
+    data: { ventaId: venta.id, tipo: 'TANGO_ENVIADO', detalle: `Factura ID ${facturaId}` },
+  });
+
+  return facturaId;
+}
+
+// ─────────────────────────────────────────────
+// ENVIAR A TANGO — Remito + Factura automático
 // ─────────────────────────────────────────────
 async function enviarATango(venta) {
   if (!process.env.TANGO_PUBLIC_KEY) {
@@ -151,38 +223,13 @@ async function enviarATango(venta) {
   }
 
   try {
-    const token   = await obtenerToken();
-    const payload = buildTangoPayload(venta, token);
+    // 1. Crear remito
+    const remitoId = await crearRemitoTango(venta);
 
-    const catLabel = { 1: 'RI', 4: 'CF', 6: 'Mono' }[payload.CategoriaImpositivaCodigo] || '?';
-    logger.info(`Enviando ${venta.numero} a Tango (Factura ${payload.Letra} / ${catLabel})...`);
+    // 2. Crear factura vinculada al remito
+    const facturaId = await crearFacturaTango(venta, remitoId);
 
-    const response = await axios.post(
-      `${TANGO_BASE_URL}/CrearFactura`,
-      new URLSearchParams(payload).toString(),   // form-urlencoded, igual que SDK PHP
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 15000 }
-    );
-
-    // La respuesta viene como APIResult: { CodigoError, Data, Error }
-    const result  = response.data;
-    if (result?.CodigoError !== 0 && result?.Error?.length) {
-      const msgs = result.Error.map(e => e.Mensaje).join(' | ');
-      throw new Error(`Tango rechazó el comprobante: ${msgs}`);
-    }
-
-    const tangoId = result?.Data?.MovimientoId || result?.Data?.MovimientoID || 'OK';
-    logger.info(`Remito ${venta.numero} enviado a Tango — ID: ${tangoId}`);
-
-    await prisma.venta.update({
-      where: { id: venta.id },
-      data:  { tangoRemitoId: String(tangoId), tangoEnviado: true },
-    });
-
-    await prisma.eventoVenta.create({
-      data: { ventaId: venta.id, tipo: 'TANGO_ENVIADO', detalle: `ID ${tangoId}` },
-    });
-
-    return result.Data;
+    return { remitoId, facturaId };
 
   } catch (err) {
     if (err.response?.status === 401) {
@@ -191,9 +238,7 @@ async function enviarATango(venta) {
       return enviarATango(venta);
     }
 
-    const msg = err.response?.data?.Error?.[0]?.Mensaje
-      || err.response?.data?.Message
-      || err.message;
+    const msg = err.message || err.response?.data?.Error?.[0]?.Mensaje;
     logger.error(`Error Tango ${venta.numero}: ${msg}`);
 
     await prisma.eventoVenta.create({
@@ -223,4 +268,21 @@ async function reintentarPendientes() {
   }
 }
 
+// Para uso interno/testing
+function buildTangoPayload(venta, token) {
+  const categoriaImpositiva = resolverCategoriaImpositiva(venta);
+  return {
+    ApplicationPublicKey:      process.env.TANGO_PUBLIC_KEY,
+    UserIdentifier:            process.env.TANGO_USER_ID,
+    Token:                     token,
+    Letra:                     resolverLetra(categoriaImpositiva),
+    CategoriaImpositivaCodigo: categoriaImpositiva,
+    ClienteTipoDocumento:      resolverTipoDocumento(venta, categoriaImpositiva),
+    ClienteNumeroDocumento:    resolverNroDocumento(venta),
+    PerfilComprobanteID:       resolverPerfilComprobante(venta),
+    ...aplanarItems(venta.items),
+  };
+}
+
 module.exports = { enviarATango, reintentarPendientes, buildTangoPayload };
+
