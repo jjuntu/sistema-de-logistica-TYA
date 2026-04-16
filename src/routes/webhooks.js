@@ -94,7 +94,8 @@ router.post('/woocommerce', async (req, res) => {
 // ─────────────────────────────────────────────
 router.post('/tiendanube', async (req, res) => {
   try {
-    const { event, store_id } = req.body;
+    const event = req.body.event || req.body.topic;
+    const store_id = req.body.store_id || req.body.store;
     logger.info(`Webhook TN recibido — event: ${event}, store: ${store_id}`);
 
     await prisma.webhookLog.create({
