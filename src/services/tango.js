@@ -51,11 +51,21 @@ function resolverNroDocumento(venta) {
   return '0';
 }
 
-// Perfil según empresa/canal
+// Perfil según empresa
 // 22749 = ABC TECHOS | 22750 = ACEROS INOXIDABLES
 function resolverPerfilComprobante(venta) {
-  const canal = (venta.canal || '').toUpperCase();
-  if (canal === 'WOOCOMMERCE' || canal === 'ABC' || canal === 'ABCTECHOS') return 22749;
+  const unidad = (venta.unidad || '').toUpperCase();
+  const canal  = (venta.canal  || '').toUpperCase();
+
+  // Prioridad: campo unidad (más confiable)
+  if (unidad === 'ABCTECHOS' || unidad === 'ABC')              return 22749;
+  if (unidad === 'ACEROINOXIDABLES' || unidad === 'ACEROS')    return 22750;
+
+  // Fallback: canal
+  if (canal === 'WOOCOMMERCE')                                  return 22749;
+  if (canal === 'TIENDANUBE' || canal === 'MERCADOLIBRE')       return 22750;
+
+  // Default
   return 22750;
 }
 
