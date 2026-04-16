@@ -1,1504 +1,582 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SisLogística — ABCTechos · Acero Inox</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>SisLogística</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0f0f0f;
-  --bg2: #161616;
-  --bg3: #1e1e1e;
-  --bg4: #252525;
-  --border: #2a2a2a;
-  --border2: #333;
-  --text: #f0f0f0;
-  --text2: #999;
-  --text3: #666;
-  --accent: #e8ff47;
-  --accent2: #ff6b35;
-  --abc: #7c6dfa;
-  --acero: #fa6d3f;
-  --green: #4ade80;
-  --yellow: #fbbf24;
-  --blue: #60a5fa;
-  --red: #f87171;
-  --radius: 8px;
-  --radius-lg: 12px;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-}
-
-/* ── SIDEBAR ── */
-.sidebar {
-  width: 220px;
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  flex-shrink: 0;
-}
-
-.sidebar-brand {
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.brand-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 6px;
-}
-
-.brand-icon {
-  width: 28px;
-  height: 28px;
-  background: var(--accent);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-}
-
-.brand-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -0.3px;
-}
-
-.brand-sub {
-  font-size: 11px;
-  color: var(--text3);
-  font-family: 'DM Mono', monospace;
-}
-
-.nav {
-  flex: 1;
-  padding: 12px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius);
-  font-size: 13px;
-  color: var(--text2);
-  cursor: pointer;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  transition: all 0.15s;
-  font-family: 'DM Sans', sans-serif;
-}
-
-.nav-item:hover { background: var(--bg3); color: var(--text); }
-.nav-item.active { background: var(--bg4); color: var(--text); font-weight: 500; }
-.nav-item.active .nav-dot { background: var(--accent); }
-
-.nav-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--border2);
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.nav-icon { font-size: 15px; flex-shrink: 0; }
-
-.sidebar-footer {
-  padding: 12px 16px;
-  border-top: 1px solid var(--border);
-  font-size: 11px;
-  color: var(--text3);
-  font-family: 'DM Mono', monospace;
-}
-
-.status-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  margin-right: 6px;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-/* ── MAIN ── */
-.main {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.topbar {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--bg2);
-  flex-shrink: 0;
-}
-
-.page-title { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
-.page-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
-
-.topbar-actions { display: flex; gap: 8px; align-items: center; }
-
-.content { padding: 24px; flex: 1; }
-
-/* ── PAGE VISIBILITY ── */
-.page { display: none; }
-.page.active { display: block; }
-
-/* ── METRICS ── */
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.metric {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  position: relative;
-  overflow: hidden;
-}
-
-.metric::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-}
-
-.metric.m-hoy::before { background: var(--accent); }
-.metric.m-pend::before { background: var(--yellow); }
-.metric.m-trans::before { background: var(--blue); }
-.metric.m-entr::before { background: var(--green); }
-
-.metric-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.metric-value { font-size: 28px; font-weight: 600; color: var(--text); font-family: 'DM Mono', monospace; letter-spacing: -1px; }
-.metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
-
-/* ── CARDS ── */
-.card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin-bottom: 16px;
-}
-
-.card-header {
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.card-title { font-size: 13px; font-weight: 600; }
-.card-body { padding: 0; }
-
-/* ── TABLE ── */
-.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-.tbl th {
-  text-align: left;
-  padding: 10px 16px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 1px solid var(--border);
-}
-.tbl td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
-  vertical-align: middle;
-}
-.tbl tr:last-child td { border-bottom: none; }
-.tbl tr:hover td { background: var(--bg3); }
-
-/* ── BADGES ── */
-.badge {
-  display: inline-block;
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-weight: 500;
-  font-family: 'DM Mono', monospace;
-}
-.b-pend { background: rgba(251,191,36,0.15); color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
-.b-trans { background: rgba(96,165,250,0.15); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
-.b-entr { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
-.b-abc { background: rgba(124,109,250,0.15); color: var(--abc); border: 1px solid rgba(124,109,250,0.25); }
-.b-acero { background: rgba(250,109,63,0.15); color: var(--acero); border: 1px solid rgba(250,109,63,0.25); }
-.b-ml { background: rgba(255,199,0,0.15); color: #ffc700; border: 1px solid rgba(255,199,0,0.25); }
-.b-tn { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
-.b-wc { background: rgba(155,81,224,0.15); color: #a855f7; border: 1px solid rgba(155,81,224,0.25); }
-.b-local { background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.25); }
-
-/* ── BUTTONS ── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  font-size: 12px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border2);
-  background: var(--bg3);
-  color: var(--text);
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-.btn:hover { background: var(--bg4); border-color: var(--text3); }
-.btn-accent { background: var(--accent); color: #000; border-color: var(--accent); }
-.btn-accent:hover { background: #d4eb3e; }
-.btn-sm { padding: 4px 10px; font-size: 11px; }
-.btn-ghost { background: transparent; border-color: transparent; color: var(--text2); }
-.btn-ghost:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
-
-/* ── DESPACHO KANBAN ── */
-.kanban {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.kanban-col { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); }
-.kanban-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.kanban-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-.kanban-count {
-  font-size: 11px;
-  background: var(--bg4);
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  padding: 2px 7px;
-  font-family: 'DM Mono', monospace;
-  color: var(--text2);
-}
-.kanban-body { padding: 12px; min-height: 200px; }
-
-.kcard {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
-  margin-bottom: 8px;
-  transition: border-color 0.15s;
-}
-.kcard:hover { border-color: var(--border2); }
-.kcard-id { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text2); margin-bottom: 4px; }
-.kcard-cliente { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
-.kcard-dir { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
-.kcard-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-
-/* ── FORM ── */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-.form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 4px; }
-.form-group label { font-size: 11px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: 9px 12px;
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  font-size: 13px;
-  background: var(--bg3);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  transition: border-color 0.15s;
-}
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-.form-group select option { background: var(--bg3); }
-
-.section-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  padding: 16px 0 8px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 14px;
-}
-
-/* ── ITEMS TABLE ── */
-.items-tbl { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 8px; }
-.items-tbl th { font-size: 11px; color: var(--text3); padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.4px; }
-.items-tbl td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
-.items-tbl td input,
-.items-tbl td select {
-  padding: 5px 8px;
-  border: 1px solid var(--border2);
-  border-radius: 5px;
-  font-size: 12px;
-  background: var(--bg3);
-  color: var(--text);
-  width: 100%;
-  font-family: 'DM Sans', sans-serif;
-}
-.items-tbl td input:focus, .items-tbl td select:focus { outline: none; border-color: var(--accent); }
-.item-total { font-family: 'DM Mono', monospace; color: var(--accent); font-size: 12px; }
-
-/* ── LOGISTICA PANEL ── */
-.logistica-box {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  margin-bottom: 10px;
-}
-.logistica-box .lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
-.logistica-box .val { font-size: 14px; font-weight: 500; }
-.logistica-box .sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
-
-.transport-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
-.transport-opt {
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 10px 8px;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.15s;
-}
-.transport-opt:hover { border-color: var(--text3); background: var(--bg4); }
-.transport-opt.selected { border-color: var(--accent); background: rgba(232,255,71,0.06); }
-.t-icon { font-size: 18px; margin-bottom: 4px; }
-.t-name { font-size: 12px; font-weight: 600; color: var(--text); }
-.t-detail { font-size: 10px; color: var(--text3); margin-top: 2px; }
-
-/* ── MODAL ── */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(2px);
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  width: 90%;
-  max-width: 700px;
-  max-height: 85vh;
-  overflow-y: auto;
-}
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.modal-title { font-size: 16px; font-weight: 600; }
-.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text2); line-height: 1; }
-.modal-close:hover { color: var(--text); }
-
-/* ── REMITO PREVIEW ── */
-.remito-preview {
-  background: #fff;
-  color: #111;
-  border-radius: var(--radius);
-  padding: 20px;
-  font-family: 'DM Sans', sans-serif;
-}
-.remito-preview * { color: #111 !important; }
-.remito-top { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 14px; border-bottom: 1px solid #ddd; margin-bottom: 14px; }
-.remito-empresa { font-size: 13px; font-weight: 600; }
-.remito-sub { font-size: 11px; color: #666 !important; }
-.remito-num { font-size: 15px; font-weight: 700; text-align: right; }
-.remito-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.remito-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #999 !important; letter-spacing: 0.5px; margin-bottom: 4px; }
-.remito-tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0; }
-.remito-tbl th { font-size: 10px; font-weight: 600; text-transform: uppercase; color: #888 !important; border-bottom: 1px solid #ddd; padding: 5px 8px; text-align: left; }
-.remito-tbl td { padding: 7px 8px; border-bottom: 1px solid #eee; font-size: 12px; }
-.remito-total { text-align: right; font-weight: 700; font-size: 14px; padding-top: 8px; border-top: 1px solid #ddd; }
-
-/* ── UNIDAD TABS ── */
-.unidad-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-.unidad-tab {
-  padding: 7px 16px;
-  font-size: 13px;
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  cursor: pointer;
-  background: none;
-  color: var(--text2);
-  font-family: 'DM Sans', sans-serif;
-  transition: all 0.15s;
-}
-.unidad-tab:hover { background: var(--bg3); color: var(--text); }
-.unidad-tab.active.abc { background: rgba(124,109,250,0.15); color: var(--abc); border-color: rgba(124,109,250,0.4); }
-.unidad-tab.active.acero { background: rgba(250,109,63,0.15); color: var(--acero); border-color: rgba(250,109,63,0.4); }
-
-/* ── TOAST ── */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: var(--bg4);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  padding: 12px 18px;
-  border-radius: var(--radius);
-  font-size: 13px;
-  z-index: 9999;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.25s;
-  pointer-events: none;
-}
-.toast.show { opacity: 1; transform: translateY(0); }
-.toast.success { border-color: var(--green); }
-.toast.error { border-color: var(--red); }
-
-/* ── EMPTY STATE ── */
-.empty { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
-.empty-icon { font-size: 32px; margin-bottom: 10px; }
-
-/* ── LOADING ── */
-.loading { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 10px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text3); }
-
-.form-nueva { max-width: 900px; }
-.total-bar {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 8px;
-}
-.total-label { font-size: 12px; color: var(--text2); }
-.total-value { font-size: 18px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--accent); }
-
-.alert {
-  padding: 10px 14px;
-  border-radius: var(--radius);
-  font-size: 12px;
-  margin-bottom: 12px;
-  border: 1px solid;
-}
-.alert-info { background: rgba(96,165,250,0.08); color: var(--blue); border-color: rgba(96,165,250,0.2); }
-.alert-success { background: rgba(74,222,128,0.08); color: var(--green); border-color: rgba(74,222,128,0.2); }
+:root{--ff:'Instrument Sans',sans-serif;--mono:'JetBrains Mono',monospace;--r:8px;--rl:12px;--abc:#6c5ce7;--acero:#e17055;--green:#00b894;--yellow:#fdcb6e;--blue:#0984e3;--orange:#e67e22;--red:#d63031}
+[data-theme=dark]{--bg:#111113;--bg2:#18181b;--bg3:#1f1f23;--bg4:#27272b;--bd:#2e2e33;--bd2:#3a3a40;--t:#f4f4f5;--t2:#a1a1aa;--t3:#52525b;--sh:rgba(0,0,0,.4)}
+[data-theme=light]{--bg:#f8f8f6;--bg2:#fff;--bg3:#f4f4f2;--bg4:#ebebea;--bd:#e5e5e3;--bd2:#d4d4d1;--t:#18181b;--t2:#71717a;--t3:#a1a1aa;--sh:rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--ff);background:var(--bg);color:var(--t);display:flex;height:100vh;overflow:hidden;transition:background .2s,color .2s}
+.sidebar{width:210px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
+.sb-brand{padding:18px 16px 14px;border-bottom:1px solid var(--bd)}
+.sb-row{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+.sb-mark{width:26px;height:26px;background:var(--t);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.sb-name{font-size:13px;font-weight:700;letter-spacing:-.2px}
+.sb-sub{font-size:10.5px;color:var(--t3);font-family:var(--mono);padding-left:35px}
+.nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:1px}
+.nb{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:var(--ff);transition:background .12s,color .12s}
+.nb:hover{background:var(--bg3);color:var(--t)}
+.nb.active{background:var(--bg4);color:var(--t)}
+.ni{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nsep{height:1px;background:var(--bd);margin:6px 0}
+.sb-bot{padding:12px 14px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.st{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3);font-family:var(--mono)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.thbtn{background:var(--bg3);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;color:var(--t2);font-family:var(--ff);transition:background .12s}
+.thbtn:hover{background:var(--bg4);color:var(--t)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:14px 22px;border-bottom:1px solid var(--bd);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tbl-l{display:flex;flex-direction:column;gap:2px}
+.pt{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.ps{font-size:11.5px;color:var(--t2)}
+.tbl-r{display:flex;gap:8px;align-items:center}
+.content{flex:1;overflow-y:auto;padding:20px 22px}
+.page{display:none}
+.page.active{display:block}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.metric{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rl);padding:14px 16px;position:relative;overflow:hidden}
+.mac{position:absolute;top:0;left:0;right:0;height:2px}
+.m-hoy .mac{background:var(--yellow)}
+.m-pend .mac{background:var(--orange)}
+.m-trans .mac{background:var(--blue)}
+.m-entr .mac{background:var(--green)}
+.ml{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:8px}
+.mv{font-size:30px;font-weight:700;font-family:var(--mono);letter-spacing:-1px;line-height:1}
+.ms{font-size:11px;color:var(--t3);margin-top:5px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rl);margin-bottom:14px;overflow:hidden}
+.ch{padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.ct{font-size:13px;font-weight:600}
+table.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+table.tbl th{padding:9px 14px;text-align:left;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);border-bottom:1px solid var(--bd);white-space:nowrap}
+table.tbl td{padding:11px 14px;border-bottom:1px solid var(--bd);vertical-align:middle}
+table.tbl tr:last-child td{border-bottom:none}
+table.tbl tbody tr:hover td{background:var(--bg3)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;white-space:nowrap}
+.b-pendiente{background:rgba(253,203,110,.14);color:#d4a017;border:1px solid rgba(253,203,110,.3)}
+.b-despachado,.b-transito{background:rgba(9,132,227,.14);color:var(--blue);border:1px solid rgba(9,132,227,.3)}
+.b-entregado,.b-retirado{background:rgba(0,184,148,.14);color:var(--green);border:1px solid rgba(0,184,148,.3)}
+.b-cancelado{background:rgba(214,48,49,.12);color:var(--red);border:1px solid rgba(214,48,49,.25)}
+.b-abc{background:rgba(108,92,231,.14);color:var(--abc);border:1px solid rgba(108,92,231,.3)}
+.b-acero{background:rgba(225,112,85,.14);color:var(--acero);border:1px solid rgba(225,112,85,.3)}
+.b-ml{background:rgba(255,199,0,.14);color:#c9a000;border:1px solid rgba(255,199,0,.3)}
+.b-tn{background:rgba(0,184,148,.14);color:var(--green);border:1px solid rgba(0,184,148,.3)}
+.b-wc{background:rgba(149,76,233,.14);color:#9b59b6;border:1px solid rgba(149,76,233,.3)}
+.b-local{background:var(--bg4);color:var(--t2);border:1px solid var(--bd2)}
+.b-wpp{background:rgba(37,211,102,.14);color:#25d366;border:1px solid rgba(37,211,102,.3)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;font-size:12px;font-weight:500;border-radius:6px;border:1px solid var(--bd2);background:var(--bg3);color:var(--t);cursor:pointer;font-family:var(--ff);white-space:nowrap;transition:background .12s,border-color .12s}
+.btn:hover{background:var(--bg4)}
+.btn:active{transform:scale(.98)}
+.btn-sm{padding:4px 9px;font-size:11px}
+.btn-xs{padding:3px 7px;font-size:10.5px}
+.btn-primary{background:var(--t);color:var(--bg);border-color:var(--t)}
+.btn-primary:hover{opacity:.87;background:var(--t)}
+.btn-green{background:rgba(0,184,148,.15);color:var(--green);border-color:rgba(0,184,148,.35)}
+.btn-green:hover{background:rgba(0,184,148,.25)}
+.btn-blue{background:rgba(9,132,227,.15);color:var(--blue);border-color:rgba(9,132,227,.35)}
+.btn-blue:hover{background:rgba(9,132,227,.25)}
+.btn-orange{background:rgba(230,126,34,.15);color:var(--orange);border-color:rgba(230,126,34,.35)}
+.btn-orange:hover{background:rgba(230,126,34,.25)}
+.btn-red{background:rgba(214,48,49,.12);color:var(--red);border-color:rgba(214,48,49,.25)}
+.btn-red:hover{background:rgba(214,48,49,.22)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--t2)}
+.btn-ghost:hover{background:var(--bg3);border-color:var(--bd);color:var(--t)}
+.ag{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.kcol{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden}
+.kh{padding:11px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.kt{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.kdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.kc{font-size:11px;font-family:var(--mono);background:var(--bg4);border:1px solid var(--bd2);border-radius:4px;padding:2px 6px;color:var(--t2)}
+.kb{padding:10px;min-height:180px}
+.kcard{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:11px 12px;margin-bottom:7px}
+.kcard:hover{border-color:var(--bd2)}
+.kcard-meta{display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap}
+.kcard-num{font-size:10.5px;font-family:var(--mono);font-weight:500;color:var(--t2)}
+.kcard-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.kcard-dir{font-size:11px;color:var(--t2);margin-bottom:8px}
+.kcard-actions{display:flex;gap:5px;flex-wrap:wrap}
+.fw{max-width:860px}
+.fsec{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);padding-bottom:8px;border-bottom:1px solid var(--bd);margin:18px 0 13px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--t3)}
+.fg input,.fg select,.fg textarea{padding:8px 11px;border:1px solid var(--bd2);border-radius:6px;font-size:13px;background:var(--bg3);color:var(--t);font-family:var(--ff);transition:border-color .12s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--t2);background:var(--bg2)}
+.fg select option{background:var(--bg3);color:var(--t)}
+.itbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.itbl th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);padding:7px 9px;border-bottom:1px solid var(--bd);text-align:left}
+.itbl td{padding:6px 8px;border-bottom:1px solid var(--bd)}
+.itbl tr:last-child td{border-bottom:none}
+.itbl td input,.itbl td select{padding:5px 8px;border:1px solid var(--bd2);border-radius:5px;font-size:12px;background:var(--bg3);color:var(--t);width:100%;font-family:var(--ff)}
+.itbl td input:focus,.itbl td select:focus{outline:none;border-color:var(--t2)}
+.itc{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--t2)}
+.trow{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:11px 15px;display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.trl{font-size:12px;color:var(--t2)}
+.trv{font-size:20px;font-weight:700;font-family:var(--mono);letter-spacing:-.5px}
+.utabs{display:flex;gap:7px;margin-bottom:14px}
+.utab{padding:7px 15px;font-size:12.5px;font-weight:600;border-radius:6px;border:1px solid var(--bd2);background:var(--bg3);color:var(--t2);cursor:pointer;font-family:var(--ff);transition:all .12s}
+.utab:hover{background:var(--bg4);color:var(--t)}
+.utab.active.ua{background:rgba(108,92,231,.15);color:var(--abc);border-color:rgba(108,92,231,.4)}
+.utab.active.ub{background:rgba(225,112,85,.15);color:var(--acero);border-color:rgba(225,112,85,.4)}
+.lpanel{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-top:4px}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.topt{border:1px solid var(--bd2);border-radius:6px;padding:10px 8px;cursor:pointer;text-align:center;background:var(--bg2);transition:all .12s}
+.topt:hover{border-color:var(--t3);background:var(--bg4)}
+.topt.sel{border-color:var(--t);background:var(--bg4)}
+.ti{font-size:17px;margin-bottom:4px}
+.tn{font-size:12px;font-weight:600}
+.td{font-size:10px;color:var(--t3);margin-top:2px}
+.ibox{background:rgba(9,132,227,.08);border:1px solid rgba(9,132,227,.2);border-radius:6px;padding:9px 12px;font-size:12px;color:var(--blue);margin-top:8px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--rl);padding:22px;width:90%;max-width:680px;max-height:88vh;overflow-y:auto;animation:min .18s ease}
+@keyframes min{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.mt{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.mx{background:none;border:none;font-size:20px;cursor:pointer;color:var(--t2);line-height:1;padding:2px 6px;border-radius:5px}
+.mx:hover{background:var(--bg4);color:var(--t)}
+.rp{background:#fff;color:#111;border:1px solid #e5e5e5;border-radius:var(--r);padding:20px 22px;font-family:var(--ff)}
+.rp *{color:#111 !important}
+.rpt{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:1.5px solid #e5e5e5;margin-bottom:14px}
+.rpe{font-size:15px;font-weight:700}
+.rps{font-size:11px;color:#888 !important;margin-top:2px}
+.rpn{font-size:17px;font-weight:800;text-align:right;font-family:var(--mono)}
+.rpg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.rpl{font-size:10px;font-weight:700;text-transform:uppercase;color:#999 !important;letter-spacing:.5px;margin-bottom:4px}
+.rptbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
+.rptbl th{font-size:10px;font-weight:700;text-transform:uppercase;color:#888 !important;border-bottom:1px solid #ddd;padding:5px 8px;text-align:left}
+.rptbl td{padding:8px;border-bottom:1px solid #f0f0f0}
+.rptot{text-align:right;font-weight:800;font-size:15px;padding-top:10px;border-top:1.5px solid #e5e5e5;margin-top:4px}
+.ep{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;margin-top:14px}
+.ept{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:10px}
+.ebs{display:flex;gap:7px;flex-wrap:wrap}
+.mf{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap}
+.loading{text-align:center;padding:36px;color:var(--t3);font-size:13px}
+.spinner{width:18px;height:18px;border:2px solid var(--bd2);border-top-color:var(--t2);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:38px;color:var(--t3);font-size:13px}
+.ei{font-size:28px;margin-bottom:8px}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--bg4);border:1px solid var(--bd2);color:var(--t);padding:10px 16px;border-radius:var(--r);font-size:12.5px;z-index:9999;opacity:0;transform:translateY(8px);transition:all .22s;pointer-events:none;box-shadow:0 4px 20px var(--sh)}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{border-color:var(--green)}
+.toast.err{border-color:var(--red)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+.fsel{padding:5px 10px;border:1px solid var(--bd2);border-radius:6px;background:var(--bg3);color:var(--t);font-size:12px;font-family:var(--ff);cursor:pointer}
+.fsel:focus{outline:none}
 </style>
 </head>
 <body>
-
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="sidebar-brand">
-    <div class="brand-logo">
-      <div class="brand-icon">🏗</div>
-      <div class="brand-name">SisLogística</div>
-    </div>
-    <div class="brand-sub">ABCTechos · AceroInox</div>
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-row"><div class="sb-mark">&#127959;</div><div class="sb-name">SisLog&iacute;stica</div></div>
+    <div class="sb-sub">ABCTechos &middot; AceroInox</div>
   </div>
-
   <nav class="nav">
-    <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
-      <span class="nav-icon">⬛</span> Panel
-      <span class="nav-dot"></span>
-    </button>
-    <button class="nav-item" id="nav-despacho" onclick="showPage('despacho')">
-      <span class="nav-icon">🚚</span> Despacho
-      <span class="nav-dot"></span>
-    </button>
-    <button class="nav-item" id="nav-nueva-venta" onclick="showPage('nueva-venta')">
-      <span class="nav-icon">＋</span> Nueva venta
-      <span class="nav-dot"></span>
-    </button>
-    <button class="nav-item" id="nav-remitos" onclick="showPage('remitos')">
-      <span class="nav-icon">📄</span> Remitos
-      <span class="nav-dot"></span>
-    </button>
-    <button class="nav-item" id="nav-clientes" onclick="showPage('clientes')">
-      <span class="nav-icon">👤</span> Clientes
-      <span class="nav-dot"></span>
-    </button>
+    <button class="nb active" id="nav-dashboard" onclick="showPage('dashboard')"><span class="ni">&#9642;</span> Panel</button>
+    <button class="nb" id="nav-despacho" onclick="showPage('despacho')"><span class="ni">&#128666;</span> Despacho</button>
+    <div class="nsep"></div>
+    <button class="nb" id="nav-nueva-venta" onclick="showPage('nueva-venta')"><span class="ni">&#65291;</span> Nueva venta</button>
+    <div class="nsep"></div>
+    <button class="nb" id="nav-remitos" onclick="showPage('remitos')"><span class="ni">&#128196;</span> Remitos</button>
+    <button class="nb" id="nav-clientes" onclick="showPage('clientes')"><span class="ni">&#128100;</span> Clientes</button>
   </nav>
-
-  <div class="sidebar-footer">
-    <span class="status-dot"></span>Backend online
+  <div class="sb-bot">
+    <div class="st"><span class="dot"></span> online</div>
+    <button class="thbtn" id="thbtn" onclick="toggleTheme()">&#9728;&#65038;</button>
   </div>
-</div>
-
-<!-- MAIN -->
+</aside>
 <div class="main">
-
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
     <div class="topbar">
-      <div>
-        <div class="page-title">Panel de control</div>
-        <div class="page-sub" id="dashboard-fecha"></div>
-      </div>
-      <div class="topbar-actions">
-        <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">↻ Actualizar</button>
+      <div class="tbl-l"><div class="pt">Panel de control</div><div class="ps" id="dash-fecha"></div></div>
+      <div class="tbl-r">
+        <select class="fsel" id="filtro-canal" onchange="loadDashboard()">
+          <option value="">Todos los canales</option>
+          <option value="MERCADOLIBRE">Mercado Libre</option>
+          <option value="TIENDANUBE">Tiendanube</option>
+          <option value="WOOCOMMERCE">WooCommerce</option>
+          <option value="LOCAL">Mostrador</option>
+          <option value="WHATSAPP">WhatsApp</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">&#8635; Actualizar</button>
       </div>
     </div>
     <div class="content">
       <div class="metrics">
-        <div class="metric m-hoy">
-          <div class="metric-label">Ventas hoy</div>
-          <div class="metric-value" id="m-hoy">—</div>
-          <div class="metric-sub">desde 00:00 hs</div>
-        </div>
-        <div class="metric m-pend">
-          <div class="metric-label">Pendientes</div>
-          <div class="metric-value" id="m-pend">—</div>
-          <div class="metric-sub">sin despachar</div>
-        </div>
-        <div class="metric m-trans">
-          <div class="metric-label">En tránsito</div>
-          <div class="metric-value" id="m-trans">—</div>
-          <div class="metric-sub">en camino</div>
-        </div>
-        <div class="metric m-entr">
-          <div class="metric-label">Entregados</div>
-          <div class="metric-value" id="m-entr">—</div>
-          <div class="metric-sub">completados</div>
-        </div>
+        <div class="metric m-hoy"><div class="mac"></div><div class="ml">Ventas hoy</div><div class="mv" id="m-hoy">&mdash;</div><div class="ms">desde 00:00 hs</div></div>
+        <div class="metric m-pend"><div class="mac"></div><div class="ml">Pendientes</div><div class="mv" id="m-pend">&mdash;</div><div class="ms">sin despachar</div></div>
+        <div class="metric m-trans"><div class="mac"></div><div class="ml">En tr&aacute;nsito</div><div class="mv" id="m-trans">&mdash;</div><div class="ms">en camino</div></div>
+        <div class="metric m-entr"><div class="mac"></div><div class="ml">Entregados</div><div class="mv" id="m-entr">&mdash;</div><div class="ms">completados</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-title">Ventas recientes</div>
-          <div style="display:flex;gap:8px">
-            <select id="filtro-canal" onchange="loadDashboard()" style="padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif">
-              <option value="">Todos los canales</option>
-              <option value="MERCADOLIBRE">Mercado Libre</option>
-              <option value="TIENDANUBE">Tiendanube</option>
-              <option value="WOOCOMMERCE">WooCommerce</option>
-              <option value="LOCAL">Local / WPP</option>
-            </select>
-          </div>
-        </div>
-        <div class="card-body">
-          <div id="dashboard-loading" class="loading"><div class="spinner"></div>Cargando ventas...</div>
-          <table class="tbl" id="dashboard-tbl" style="display:none">
-            <thead>
-              <tr>
-                <th>Remito</th>
-                <th>Cliente</th>
-                <th>Unidad</th>
-                <th>Canal</th>
-                <th>Destino</th>
-                <th>Transporte</th>
-                <th>Estado</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="dashboard-tbody"></tbody>
-          </table>
-          <div id="dashboard-empty" class="empty" style="display:none">
-            <div class="empty-icon">📭</div>
-            No hay ventas aún
-          </div>
-        </div>
+        <div class="ch"><div class="ct">Ventas recientes</div></div>
+        <div id="dl" class="loading"><div class="spinner"></div>Cargando...</div>
+        <table class="tbl" id="dtbl" style="display:none">
+          <thead><tr><th>Remito</th><th>Cliente</th><th>Unidad</th><th>Canal</th><th>Destino</th><th>Transporte</th><th>Estado</th><th>Acciones r&aacute;pidas</th></tr></thead>
+          <tbody id="dtbody"></tbody>
+        </table>
+        <div id="de" class="empty" style="display:none"><div class="ei">&#128141;</div>No hay ventas a&uacute;n</div>
       </div>
     </div>
   </div>
-
   <!-- DESPACHO -->
   <div class="page" id="page-despacho">
     <div class="topbar">
-      <div>
-        <div class="page-title">Despacho</div>
-        <div class="page-sub">Gestión de entregas</div>
-      </div>
-      <div class="topbar-actions">
-        <button class="btn btn-ghost btn-sm" onclick="loadDespacho()">↻ Actualizar</button>
-      </div>
+      <div class="tbl-l"><div class="pt">Despacho</div><div class="ps">Gesti&oacute;n de entregas por estado</div></div>
+      <div class="tbl-r"><button class="btn btn-ghost btn-sm" onclick="loadDespacho()">&#8635; Actualizar</button></div>
     </div>
     <div class="content">
       <div class="kanban">
-        <div class="kanban-col">
-          <div class="kanban-header">
-            <span class="kanban-title" style="color:var(--yellow)">● Pendientes</span>
-            <span class="kanban-count" id="k-pend-count">0</span>
-          </div>
-          <div class="kanban-body" id="k-pend"></div>
-        </div>
-        <div class="kanban-col">
-          <div class="kanban-header">
-            <span class="kanban-title" style="color:var(--blue)">● En tránsito</span>
-            <span class="kanban-count" id="k-trans-count">0</span>
-          </div>
-          <div class="kanban-body" id="k-trans"></div>
-        </div>
-        <div class="kanban-col">
-          <div class="kanban-header">
-            <span class="kanban-title" style="color:var(--green)">● Entregados</span>
-            <span class="kanban-count" id="k-entr-count">0</span>
-          </div>
-          <div class="kanban-body" id="k-entr"></div>
-        </div>
+        <div class="kcol"><div class="kh"><div class="kt"><div class="kdot" style="background:var(--orange)"></div>Pendiente</div><span class="kc" id="kc1">0</span></div><div class="kb" id="k1"></div></div>
+        <div class="kcol"><div class="kh"><div class="kt"><div class="kdot" style="background:var(--blue)"></div>Despachado / Tr&aacute;nsito</div><span class="kc" id="kc2">0</span></div><div class="kb" id="k2"></div></div>
+        <div class="kcol"><div class="kh"><div class="kt"><div class="kdot" style="background:var(--green)"></div>Entregado / Retirado</div><span class="kc" id="kc3">0</span></div><div class="kb" id="k3"></div></div>
       </div>
     </div>
   </div>
-
   <!-- NUEVA VENTA -->
   <div class="page" id="page-nueva-venta">
-    <div class="topbar">
-      <div>
-        <div class="page-title">Nueva venta manual</div>
-        <div class="page-sub">WhatsApp, mostrador, teléfono</div>
-      </div>
-    </div>
+    <div class="topbar"><div class="tbl-l"><div class="pt">Nueva venta manual</div><div class="ps">WhatsApp, mostrador, tel&eacute;fono</div></div></div>
     <div class="content">
-      <div class="form-nueva">
-        <div class="unidad-tabs">
-          <button class="unidad-tab abc active" id="tab-abc" onclick="setUnidad('abc')">ABCTechos</button>
-          <button class="unidad-tab acero" id="tab-acero" onclick="setUnidad('acero')">Acero Inoxidables</button>
+      <div class="fw">
+        <div class="utabs">
+          <button class="utab ua active" id="tab-abc" onclick="setU('abc')">ABCTechos</button>
+          <button class="utab ub" id="tab-acero" onclick="setU('acero')">Acero Inoxidables</button>
         </div>
-
-        <div class="section-label">Datos del cliente</div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Nombre / Razón social *</label>
-            <input type="text" id="nv-cliente" placeholder="Juan Pérez" list="clientes-list" autocomplete="off">
-            <datalist id="clientes-list"></datalist>
-          </div>
-          <div class="form-group">
-            <label>Empresa (opcional)</label>
-            <input type="text" id="nv-empresa" placeholder="Constructora SA">
-          </div>
-          <div class="form-group">
-            <label>Teléfono</label>
-            <input type="text" id="nv-tel" placeholder="11 1234-5678">
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="nv-email" placeholder="cliente@email.com">
-          </div>
+        <div class="fsec">Datos del cliente</div>
+        <div class="fgrid">
+          <div class="fg"><label>Nombre / Raz&oacute;n social *</label><input type="text" id="nv-c" placeholder="Juan P&eacute;rez" list="clist" autocomplete="off"><datalist id="clist"></datalist></div>
+          <div class="fg"><label>Empresa (opcional)</label><input type="text" id="nv-e" placeholder="Constructora SA"></div>
+          <div class="fg"><label>Tel&eacute;fono</label><input type="text" id="nv-t" placeholder="11 1234-5678"></div>
+          <div class="fg"><label>Email</label><input type="email" id="nv-em" placeholder="cliente@email.com"></div>
         </div>
-
-        <div class="section-label">Dirección de entrega</div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Calle y número *</label>
-            <input type="text" id="nv-dir" placeholder="Av. San Martín 1234" oninput="debounceLogistica()">
-          </div>
-          <div class="form-group">
-            <label>Localidad *</label>
-            <input type="text" id="nv-localidad" placeholder="Ramos Mejía" oninput="debounceLogistica()">
-          </div>
-          <div class="form-group">
-            <label>Provincia *</label>
-            <select id="nv-provincia" onchange="calcLogistica()">
-              <option value="">— Seleccionar —</option>
+        <div class="fsec">Direcci&oacute;n de entrega</div>
+        <div class="fgrid">
+          <div class="fg"><label>Calle y n&uacute;mero *</label><input type="text" id="nv-d" placeholder="Av. San Mart&iacute;n 1234" oninput="dL()"></div>
+          <div class="fg"><label>Localidad *</label><input type="text" id="nv-l" placeholder="Ramos Mej&iacute;a" oninput="dL()"></div>
+          <div class="fg"><label>Provincia *</label>
+            <select id="nv-p" onchange="calcL()">
+              <option value="">&#8212; Seleccionar &#8212;</option>
               <option value="caba">Capital Federal</option>
               <option value="buenos_aires_gba">Buenos Aires (GBA)</option>
-              <option value="interior">Interior del país</option>
+              <option value="interior">Interior del pa&iacute;s</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Código postal</label>
-            <input type="text" id="nv-cp" placeholder="1704">
-          </div>
+          <div class="fg"><label>C&oacute;digo postal</label><input type="text" id="nv-cp" placeholder="1704"></div>
         </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Canal de venta</label>
-            <select id="nv-canal" onchange="calcLogistica()">
+        <div class="fgrid">
+          <div class="fg"><label>Canal de venta</label>
+            <select id="nv-ch" onchange="calcL()">
               <option value="LOCAL">Mostrador / Presencial</option>
               <option value="WHATSAPP">WhatsApp</option>
-              <option value="TELEFONO">Teléfono</option>
+              <option value="TELEFONO">Tel&eacute;fono</option>
               <option value="MERCADOLIBRE">Mercado Libre</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Fecha</label>
-            <input type="date" id="nv-fecha">
-          </div>
+          <div class="fg"><label>Fecha</label><input type="date" id="nv-f"></div>
         </div>
-
-        <div class="section-label">Productos</div>
-        <table class="items-tbl">
-          <thead>
-            <tr>
-              <th style="width:40%">Descripción</th>
-              <th style="width:12%">Cantidad</th>
-              <th style="width:10%">Unidad</th>
-              <th style="width:16%">Precio unit.</th>
-              <th style="width:14%">Total</th>
-              <th style="width:8%"></th>
-            </tr>
-          </thead>
-          <tbody id="items-tbody"></tbody>
+        <div class="fsec">Productos</div>
+        <table class="itbl">
+          <thead><tr><th style="width:38%">Descripci&oacute;n</th><th style="width:12%">Cantidad</th><th style="width:10%">Unidad</th><th style="width:16%">Precio unit.</th><th style="width:14%">Total</th><th style="width:10%"></th></tr></thead>
+          <tbody id="itb"></tbody>
         </table>
-        <button class="btn btn-ghost btn-sm" onclick="addItem()" style="margin-bottom:12px">＋ Agregar producto</button>
-
-        <div class="total-bar">
-          <span class="total-label">Total de la venta</span>
-          <span class="total-value" id="nv-subtotal">$0</span>
-        </div>
-
-        <div class="section-label" style="margin-top:16px">Logística recomendada</div>
-        <div id="logistica-panel">
-          <div style="color:var(--text3);font-size:13px;padding:12px 0">Completá la dirección y provincia para ver opciones de envío.</div>
-        </div>
-
-        <div class="section-label">Notas internas</div>
-        <div class="form-group">
-          <textarea id="nv-notas" rows="2" placeholder="Instrucciones de entrega, referencias, etc."></textarea>
-        </div>
-
-        <div style="display:flex;gap:10px;margin-top:20px">
-          <button class="btn btn-accent" onclick="guardarVenta()">✓ Guardar venta</button>
-          <button class="btn btn-ghost" onclick="resetForm()">Limpiar</button>
+        <button class="btn btn-ghost btn-sm" onclick="addI()" style="margin-top:6px">&#65291; Agregar producto</button>
+        <div class="trow" style="margin-top:12px"><span class="trl">Total</span><span class="trv" id="nv-tot">$0</span></div>
+        <div class="fsec" style="margin-top:16px">Log&iacute;stica</div>
+        <div id="lpanel"><div style="color:var(--t3);font-size:13px;padding:10px 0">Seleccion&aacute; la provincia para ver opciones.</div></div>
+        <div class="fsec" style="margin-top:14px">Notas</div>
+        <div class="fg"><textarea id="nv-n" rows="2" placeholder="Instrucciones de entrega..."></textarea></div>
+        <div style="display:flex;gap:9px;margin-top:18px">
+          <button class="btn btn-primary" onclick="guardar()">&#10003; Guardar venta</button>
+          <button class="btn btn-ghost" onclick="resetF()">Limpiar</button>
         </div>
       </div>
     </div>
   </div>
-
   <!-- REMITOS -->
   <div class="page" id="page-remitos">
-    <div class="topbar">
-      <div>
-        <div class="page-title">Remitos</div>
-        <div class="page-sub">Historial de comprobantes</div>
-      </div>
-    </div>
+    <div class="topbar"><div class="tbl-l"><div class="pt">Remitos</div><div class="ps">Historial de comprobantes</div></div></div>
     <div class="content">
       <div class="card">
-        <div class="card-body">
-          <div id="remitos-loading" class="loading"><div class="spinner"></div>Cargando...</div>
-          <table class="tbl" id="remitos-tbl" style="display:none">
-            <thead>
-              <tr>
-                <th>Remito</th>
-                <th>Fecha</th>
-                <th>Cliente</th>
-                <th>Unidad</th>
-                <th>Canal</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="remitos-tbody"></tbody>
-          </table>
-          <div id="remitos-empty" class="empty" style="display:none">
-            <div class="empty-icon">📄</div>
-            No hay remitos aún
-          </div>
-        </div>
+        <div id="rl" class="loading"><div class="spinner"></div>Cargando...</div>
+        <table class="tbl" id="rtbl" style="display:none">
+          <thead><tr><th>Remito</th><th>Fecha</th><th>Cliente</th><th>Unidad</th><th>Canal</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="rtbody"></tbody>
+        </table>
+        <div id="re" class="empty" style="display:none"><div class="ei">&#128196;</div>No hay remitos a&uacute;n</div>
       </div>
     </div>
   </div>
-
   <!-- CLIENTES -->
   <div class="page" id="page-clientes">
-    <div class="topbar">
-      <div>
-        <div class="page-title">Clientes</div>
-        <div class="page-sub">Historial de compradores</div>
-      </div>
-    </div>
+    <div class="topbar"><div class="tbl-l"><div class="pt">Clientes</div><div class="ps">Historial de compradores</div></div></div>
     <div class="content">
       <div class="card">
-        <div class="card-body">
-          <div id="clientes-loading" class="loading"><div class="spinner"></div>Cargando...</div>
-          <table class="tbl" id="clientes-tbl" style="display:none">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Empresa</th>
-                <th>Teléfono</th>
-                <th>Email</th>
-                <th>Compras</th>
-              </tr>
-            </thead>
-            <tbody id="clientes-tbody"></tbody>
-          </table>
-          <div id="clientes-empty" class="empty" style="display:none">
-            <div class="empty-icon">👤</div>
-            No hay clientes aún
-          </div>
-        </div>
+        <div id="cl" class="loading"><div class="spinner"></div>Cargando...</div>
+        <table class="tbl" id="ctbl" style="display:none">
+          <thead><tr><th>Nombre</th><th>Empresa</th><th>Tel&eacute;fono</th><th>Email</th><th>Compras</th></tr></thead>
+          <tbody id="ctbody"></tbody>
+        </table>
+        <div id="ce" class="empty" style="display:none"><div class="ei">&#128100;</div>No hay clientes a&uacute;n</div>
       </div>
-    </div>
-  </div>
-
-</div><!-- /main -->
-
-<!-- MODAL REMITO -->
-<div class="modal-overlay" id="modal-remito">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-remito-title">Remito</div>
-      <button class="modal-close" onclick="closeModal('modal-remito')">×</button>
-    </div>
-    <div id="modal-remito-body"></div>
-    <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
-      <button class="btn btn-accent" onclick="imprimirRemito()">🖨 Imprimir remito</button>
-      <button class="btn btn-ghost" onclick="closeModal('modal-remito')">Cerrar</button>
     </div>
   </div>
 </div>
-
+<!-- MODAL -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="mh"><div class="mt" id="mt">Remito</div><button class="mx" onclick="closeM()">&#215;</button></div>
+    <div id="mb"></div>
+    <div class="ep"><div class="ept">Cambiar estado</div><div class="ebs" id="ebs"></div></div>
+    <div class="mf">
+      <button class="btn btn-ghost btn-sm" onclick="printPDF()">&#128196; PDF oficial</button>
+      <button class="btn btn-sm" onclick="printR()">&#128424; Imprimir</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeM()">Cerrar</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
-
 <script>
-// ── CONFIG ─────────────────────────────────────────────────────────────────
-const API = 'https://web-production-68d158.up.railway.app';
+const API='https://web-production-68d158.up.railway.app';
+let VA=null,selU='abc',selT=null,iC=0;
+const ES={PENDIENTE:{l:'Pendiente',c:'b-pendiente',i:'&#9203;'},DESPACHADO:{l:'Despachado',c:'b-despachado',i:'&#128230;'},TRANSITO:{l:'En tr\u00e1nsito',c:'b-transito',i:'&#128666;'},ENTREGADO:{l:'Entregado',c:'b-entregado',i:'&#9989;'},RETIRADO:{l:'Retirado en local',c:'b-retirado',i:'&#127978;'},CANCELADO:{l:'Cancelado',c:'b-cancelado',i:'&#10060;'}};
+const FL={PENDIENTE:['DESPACHADO','RETIRADO','CANCELADO'],DESPACHADO:['TRANSITO','ENTREGADO','CANCELADO'],TRANSITO:['ENTREGADO','CANCELADO'],ENTREGADO:[],RETIRADO:[],CANCELADO:['PENDIENTE']};
+const BC={DESPACHADO:'btn-blue',TRANSITO:'btn-blue',ENTREGADO:'btn-green',RETIRADO:'btn-green',CANCELADO:'btn-red',PENDIENTE:'btn-orange'};
+const TR={caba:[{id:'hilux',n:'Hilux',d:'Cargas livianas / urgente',i:'&#128667;'},{id:'accelo',n:'Accelo',d:'Cargas grandes / chapas',i:'&#128667;'}],buenos_aires_gba:[{id:'hilux',n:'Hilux',d:'Hasta ~30km, livianas',i:'&#128667;'},{id:'accelo',n:'Accelo',d:'GBA, cargas grandes',i:'&#128667;'}],interior:[{id:'andreani',n:'Andreani',d:'Paquetes hasta 30kg',i:'&#127297;'},{id:'oca',n:'OCA',d:'Env\u00edos nacionales',i:'&#128309;'},{id:'transporte',n:'Transporte de carga',d:'Cargas pesadas',i:'&#128666;'}]};
 
-// ── STATE ──────────────────────────────────────────────────────────────────
-let ventasCache = [];
-let selectedUnidad = 'abc';
-let selectedTransport = null;
-let itemCount = 0;
-let currentRemitoVentaId = null;
+let th=localStorage.getItem('th')||'dark';
+document.documentElement.setAttribute('data-theme',th);
+document.getElementById('thbtn').textContent=th==='dark'?'\u2600\uFE0E':'\u263E';
+function toggleTheme(){th=th==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',th);document.getElementById('thbtn').textContent=th==='dark'?'\u2600\uFE0E':'\u263E';localStorage.setItem('th',th);}
 
-const TRANSPORT_RULES = {
-  caba: [
-    { id:'hilux', name:'Hilux', detail:'Cargas livianas / urgente', icon:'🛻' },
-    { id:'accelo', name:'Accelo', detail:'Cargas grandes / chapas', icon:'🚛' },
-  ],
-  buenos_aires_gba: [
-    { id:'hilux', name:'Hilux', detail:'Hasta ~30km, cargas livianas', icon:'🛻' },
-    { id:'accelo', name:'Accelo', detail:'GBA, cargas grandes', icon:'🚛' },
-  ],
-  interior: [
-    { id:'andreani', name:'Andreani', detail:'Paquetes hasta 30kg', icon:'🟡' },
-    { id:'oca', name:'OCA', detail:'Envíos nacionales', icon:'🔵' },
-    { id:'transporte', name:'Transporte de carga', detail:'Cargas pesadas', icon:'🚚' },
-  ]
-};
-
-// ── NAVIGATION ─────────────────────────────────────────────────────────────
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.getElementById('nav-' + id).classList.add('active');
-  if (id === 'dashboard')    loadDashboard();
-  if (id === 'despacho')     loadDespacho();
-  if (id === 'remitos')      loadRemitos();
-  if (id === 'clientes')     loadClientes();
-  if (id === 'nueva-venta')  initNuevaVenta();
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  if(id==='dashboard')loadDashboard();
+  if(id==='despacho')loadDespacho();
+  if(id==='remitos')loadRemitos();
+  if(id==='clientes')loadClientes();
+  if(id==='nueva-venta')initF();
 }
 
-// ── API ─────────────────────────────────────────────────────────────────────
-async function apiFetch(path, opts = {}) {
-  const res = await fetch(API + path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opts
-  });
-  if (!res.ok) throw new Error('Error ' + res.status);
-  return res.json();
+async function api(path,opts={}){
+  const r=await fetch(API+path,{headers:{'Content-Type':'application/json'},...opts});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
 }
 
-// ── DASHBOARD ───────────────────────────────────────────────────────────────
-async function loadDashboard() {
-  document.getElementById('dashboard-fecha').textContent =
-    new Date().toLocaleDateString('es-AR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-
-  document.getElementById('dashboard-loading').style.display = 'block';
-  document.getElementById('dashboard-tbl').style.display = 'none';
-  document.getElementById('dashboard-empty').style.display = 'none';
-
-  try {
-    const canal = document.getElementById('filtro-canal').value;
-    const params = new URLSearchParams({ limit: 50 });
-    if (canal) params.set('canal', canal);
-
-    const [data, stats] = await Promise.all([
-      apiFetch('/api/ventas?' + params),
-      apiFetch('/api/ventas/stats/resumen')
-    ]);
-
-    ventasCache = data.ventas || [];
-    document.getElementById('m-hoy').textContent  = stats.hoy  ?? 0;
-    document.getElementById('m-pend').textContent = stats.pendientes ?? 0;
-    document.getElementById('m-trans').textContent = stats.transito ?? 0;
-    document.getElementById('m-entr').textContent  = stats.entregados ?? 0;
-
-    renderDashboardTable(ventasCache);
-  } catch(e) {
-    showToast('Error cargando datos: ' + e.message, 'error');
-    document.getElementById('dashboard-loading').style.display = 'none';
-  }
+function eb(estado){const e=ES[(estado||'PENDIENTE').toUpperCase()]||ES.PENDIENTE;return '<span class="badge '+e.c+'">'+e.i+' '+e.l+'</span>';}
+function ub(u){const x=(u||'').toUpperCase();return x.includes('ACERO')?'<span class="badge b-acero">Acero Inoxidables</span>':'<span class="badge b-abc">ABCTechos</span>';}
+function cb(c){const m={MERCADOLIBRE:'<span class="badge b-ml">Mercado Libre</span>',TIENDANUBE:'<span class="badge b-tn">Tiendanube</span>',WOOCOMMERCE:'<span class="badge b-wc">WooCommerce</span>',WHATSAPP:'<span class="badge b-wpp">WhatsApp</span>',LOCAL:'<span class="badge b-local">Mostrador</span>',TELEFONO:'<span class="badge b-local">Tel&eacute;fono</span>'};return m[c]||'<span class="badge b-local">'+(c||'&mdash;')+'</span>';}
+function cp(c){const m={MERCADOLIBRE:'Mercado Libre',TIENDANUBE:'Tiendanube',WOOCOMMERCE:'WooCommerce',LOCAL:'Mostrador',WHATSAPP:'WhatsApp',TELEFONO:'Tel&eacute;fono'};return m[c]||c||'&mdash;';}
+function qa(v){
+  const e=(v.estado||'PENDIENTE').toUpperCase(),fl=FL[e]||[];
+  let h='<button class="btn btn-ghost btn-xs" onclick="verR(\''+v.id+'\')">&#128065; Ver</button>';
+  fl.slice(0,2).forEach(s=>{const ex=ES[s],cl=BC[s]||'';h+='<button class="btn '+cl+' btn-xs" onclick="chE(\''+v.id+'\',\''+s+'\',\''+v.numero+'\')">'+ex.i+' '+ex.l+'</button>';});
+  return h;
 }
 
-function renderDashboardTable(ventas) {
-  document.getElementById('dashboard-loading').style.display = 'none';
+async function loadDashboard(){
+  document.getElementById('dash-fecha').textContent=new Date().toLocaleDateString('es-AR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('dl').style.display='block';
+  document.getElementById('dtbl').style.display='none';
+  document.getElementById('de').style.display='none';
+  try{
+    const canal=document.getElementById('filtro-canal').value;
+    const params=new URLSearchParams({limit:50});
+    if(canal)params.set('canal',canal);
+    const [data,stats]=await Promise.all([api('/api/ventas?'+params),api('/api/ventas/stats/resumen')]);
+    document.getElementById('m-hoy').textContent=stats.hoy??0;
+    document.getElementById('m-pend').textContent=stats.pendientes??0;
+    document.getElementById('m-trans').textContent=stats.transito??0;
+    document.getElementById('m-entr').textContent=stats.entregados??0;
+    const vs=data.ventas||[];
+    document.getElementById('dl').style.display='none';
+    if(!vs.length){document.getElementById('de').style.display='block';return;}
+    document.getElementById('dtbl').style.display='table';
+    document.getElementById('dtbody').innerHTML=vs.slice(0,30).map(v=>{
+      const dest=[v.dirLocalidad,v.dirProvincia].filter(Boolean).join(', ')||v.dirCalle||'&mdash;';
+      return '<tr><td style="font-family:var(--mono);font-weight:600;font-size:12px">'+v.numero+'</td><td style="font-weight:500">'+(v.clienteEmpresa||v.clienteNombre||'&mdash;')+'</td><td>'+ub(v.unidad)+'</td><td>'+cb(v.canal)+'</td><td style="font-size:12px;color:var(--t2)">'+dest+'</td><td style="font-size:12px">'+(v.transporteNombre||'&mdash;')+'</td><td>'+eb(v.estado)+'</td><td><div class="ag">'+qa(v)+'</div></td></tr>';
+    }).join('');
+  }catch(e){document.getElementById('dl').style.display='none';toast('Error: '+e.message,'err');}
+}
 
-  if (!ventas.length) {
-    document.getElementById('dashboard-empty').style.display = 'block';
-    return;
-  }
+async function loadDespacho(){
+  try{
+    const data=await api('/api/ventas?limit:150');
+    const vs=data.ventas||[];
+    const g={A:vs.filter(v=>(v.estado||'PENDIENTE').toUpperCase()==='PENDIENTE'),B:vs.filter(v=>['DESPACHADO','TRANSITO'].includes((v.estado||'').toUpperCase())),C:vs.filter(v=>['ENTREGADO','RETIRADO'].includes((v.estado||'').toUpperCase()))};
+    document.getElementById('kc1').textContent=g.A.length;
+    document.getElementById('kc2').textContent=g.B.length;
+    document.getElementById('kc3').textContent=g.C.length;
+    renderK('k1',g.A);renderK('k2',g.B);renderK('k3',g.C);
+  }catch(e){toast('Error despacho: '+e.message,'err');}
+}
 
-  document.getElementById('dashboard-tbl').style.display = 'table';
-  const tbody = document.getElementById('dashboard-tbody');
-  tbody.innerHTML = ventas.slice(0, 30).map(v => {
-    const unBadge = (v.unidad || '').toUpperCase().includes('ACERO') ?
-      '<span class="badge b-acero">Acero Inox</span>' :
-      '<span class="badge b-abc">ABCTechos</span>';
-    const canalBadge = canalLabel(v.canal);
-    const estadoBadge = estadoLabel(v.estado);
-    const destino = [v.dirLocalidad, v.dirProvincia].filter(Boolean).join(', ') || v.dirCalle || '—';
-    return `<tr>
-      <td style="font-family:'DM Mono',monospace;font-weight:600">${v.numero}</td>
-      <td>${v.clienteEmpresa || v.clienteNombre || '—'}</td>
-      <td>${unBadge}</td>
-      <td>${canalBadge}</td>
-      <td style="font-size:12px;color:var(--text2)">${destino}</td>
-      <td style="font-size:12px">${v.transporteNombre || '—'}</td>
-      <td>${estadoBadge}</td>
-      <td>
-        <button class="btn btn-sm btn-ghost" onclick="verRemito('${v.id}')">Ver</button>
-      </td>
-    </tr>`;
+function renderK(id,vs){
+  const col=document.getElementById(id);
+  if(!vs.length){col.innerHTML='<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px">Sin entregas</div>';return;}
+  col.innerHTML=vs.map(v=>{
+    const dest=[v.dirLocalidad,v.dirProvincia].filter(Boolean).join(', ')||v.dirCalle||'&mdash;';
+    const e=(v.estado||'PENDIENTE').toUpperCase(),fl=FL[e]||[];
+    let acc='<button class="btn btn-ghost btn-xs" onclick="verR(\''+v.id+'\')">&#128196; Remito</button>';
+    fl.forEach(s=>{const ex=ES[s],cl=BC[s]||'';acc+='<button class="btn '+cl+' btn-xs" onclick="chE(\''+v.id+'\',\''+s+'\',\''+v.numero+'\')">'+ex.i+' '+ex.l+'</button>';});
+    return '<div class="kcard"><div class="kcard-meta"><span class="kcard-num">'+v.numero+'</span>'+cb(v.canal)+eb(v.estado)+'</div><div class="kcard-name">'+(v.clienteEmpresa||v.clienteNombre||'&mdash;')+'</div><div class="kcard-dir">'+dest+' &middot; '+(v.transporteNombre||'sin transporte')+'</div><div class="kcard-actions">'+acc+'</div></div>';
   }).join('');
 }
 
-// ── DESPACHO ────────────────────────────────────────────────────────────────
-async function loadDespacho() {
-  try {
-    const data = await apiFetch('/api/ventas?limit=100');
-    const ventas = data.ventas || [];
-
-    ['PENDIENTE', 'TRANSITO', 'ENTREGADO'].forEach(estado => {
-      const key = estado.toLowerCase().replace('transito', 'trans').replace('pendiente', 'pend').replace('entregado', 'entr');
-      const col = document.getElementById('k-' + key);
-      const countEl = document.getElementById('k-' + key + '-count');
-      const items = ventas.filter(v => (v.estado || '').toUpperCase() === estado);
-      countEl.textContent = items.length;
-
-      if (!items.length) {
-        col.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0;text-align:center">Sin entregas</div>';
-        return;
-      }
-
-      col.innerHTML = items.map(v => {
-        const destino = [v.dirLocalidad, v.dirProvincia].filter(Boolean).join(', ') || v.dirCalle || '—';
-        let actions = '';
-        if (estado === 'PENDIENTE') actions += `<button class="btn btn-sm" onclick="cambiarEstado('${v.id}','TRANSITO')">🚚 Despachar</button>`;
-        if (estado === 'TRANSITO')  actions += `<button class="btn btn-sm" onclick="cambiarEstado('${v.id}','ENTREGADO')">✓ Entregado</button>`;
-        actions += `<button class="btn btn-sm btn-ghost" onclick="verRemito('${v.id}')">📄 Remito</button>`;
-        return `<div class="kcard">
-          <div class="kcard-id">${v.numero} · ${canalLabelPlain(v.canal)}</div>
-          <div class="kcard-cliente">${v.clienteEmpresa || v.clienteNombre || '—'}</div>
-          <div class="kcard-dir">${destino} · ${v.transporteNombre || 'sin transporte'}</div>
-          <div class="kcard-actions">${actions}</div>
-        </div>`;
-      }).join('');
-    });
-  } catch(e) {
-    showToast('Error cargando despacho: ' + e.message, 'error');
-  }
+async function chE(id,estado,numero){
+  try{
+    await api('/api/ventas/'+id+'/estado',{method:'PATCH',body:JSON.stringify({estado})});
+    const e=ES[estado];
+    toast(e.i+' '+numero+' &rarr; '+e.l,'ok');
+    const act=document.querySelector('.page.active').id;
+    if(act==='page-dashboard')loadDashboard();
+    if(act==='page-despacho')loadDespacho();
+    if(document.getElementById('modal').classList.contains('open')&&VA?.id===id){VA.estado=estado;renderEB(id,estado);}
+  }catch(e){toast('Error: '+e.message,'err');}
 }
 
-async function cambiarEstado(id, estado) {
-  try {
-    await apiFetch('/api/ventas/' + id + '/estado', {
-      method: 'PATCH',
-      body: JSON.stringify({ estado })
-    });
-    showToast('Estado actualizado ✓', 'success');
-    loadDespacho();
-  } catch(e) {
-    showToast('Error: ' + e.message, 'error');
-  }
-}
-
-// ── REMITOS ─────────────────────────────────────────────────────────────────
-async function loadRemitos() {
-  document.getElementById('remitos-loading').style.display = 'block';
-  document.getElementById('remitos-tbl').style.display = 'none';
-  document.getElementById('remitos-empty').style.display = 'none';
-
-  try {
-    const data = await apiFetch('/api/ventas?limit=100');
-    const ventas = data.ventas || [];
-    document.getElementById('remitos-loading').style.display = 'none';
-
-    if (!ventas.length) { document.getElementById('remitos-empty').style.display = 'block'; return; }
-    document.getElementById('remitos-tbl').style.display = 'table';
-
-    document.getElementById('remitos-tbody').innerHTML = ventas.map(v => {
-      const unBadge = (v.unidad || '').toUpperCase().includes('ACERO') ?
-        '<span class="badge b-acero">Acero Inox</span>' : '<span class="badge b-abc">ABCTechos</span>';
-      const total = v.total ? '$' + Number(v.total).toLocaleString('es-AR') : '—';
-      return `<tr>
-        <td style="font-family:'DM Mono',monospace;font-weight:600">${v.numero}</td>
-        <td style="font-size:12px">${new Date(v.fecha).toLocaleDateString('es-AR')}</td>
-        <td>${v.clienteEmpresa || v.clienteNombre || '—'}</td>
-        <td>${unBadge}</td>
-        <td>${canalLabel(v.canal)}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px">${total}</td>
-        <td>${estadoLabel(v.estado)}</td>
-        <td>
-          <button class="btn btn-sm btn-ghost" onclick="verRemito('${v.id}')">Ver</button>
-          <button class="btn btn-sm btn-ghost" onclick="imprimirPDF('${v.id}','${v.numero}')" style="margin-left:4px">🖨</button>
-        </td>
-      </tr>`;
+async function loadRemitos(){
+  document.getElementById('rl').style.display='block';
+  document.getElementById('rtbl').style.display='none';
+  document.getElementById('re').style.display='none';
+  try{
+    const data=await api('/api/ventas?limit=100');
+    const vs=data.ventas||[];
+    document.getElementById('rl').style.display='none';
+    if(!vs.length){document.getElementById('re').style.display='block';return;}
+    document.getElementById('rtbl').style.display='table';
+    document.getElementById('rtbody').innerHTML=vs.map(v=>{
+      const tot=v.total?'$'+Number(v.total).toLocaleString('es-AR'):'&mdash;';
+      const f=new Date(v.fecha).toLocaleDateString('es-AR');
+      return '<tr><td style="font-family:var(--mono);font-weight:600;font-size:12px">'+v.numero+'</td><td style="font-size:12px">'+f+'</td><td style="font-weight:500">'+(v.clienteEmpresa||v.clienteNombre||'&mdash;')+'</td><td>'+ub(v.unidad)+'</td><td>'+cb(v.canal)+'</td><td style="font-family:var(--mono);font-size:12px">'+tot+'</td><td>'+eb(v.estado)+'</td><td><div class="ag"><button class="btn btn-ghost btn-xs" onclick="verR(\''+v.id+'\')">&#128065; Ver</button><button class="btn btn-ghost btn-xs" onclick="window.open(\''+API+'/api/ventas/'+v.id+'/remito-pdf\',\'_blank\')">&#128196; PDF</button></div></td></tr>';
     }).join('');
-  } catch(e) {
-    document.getElementById('remitos-loading').style.display = 'none';
-    showToast('Error: ' + e.message, 'error');
-  }
+  }catch(e){document.getElementById('rl').style.display='none';toast('Error: '+e.message,'err');}
 }
 
-// ── CLIENTES ────────────────────────────────────────────────────────────────
-async function loadClientes() {
-  document.getElementById('clientes-loading').style.display = 'block';
-  document.getElementById('clientes-tbl').style.display = 'none';
-
-  try {
-    const data = await apiFetch('/api/ventas?limit=200');
-    const ventas = data.ventas || [];
-    document.getElementById('clientes-loading').style.display = 'none';
-
-    const mapa = {};
-    ventas.forEach(v => {
-      const key = (v.clienteEmpresa || v.clienteNombre || '').toLowerCase();
-      if (!mapa[key]) mapa[key] = {
-        nombre: v.clienteNombre || '—',
-        empresa: v.clienteEmpresa || '—',
-        tel: v.clienteTel || '—',
-        email: v.clienteEmail || '—',
-        count: 0
-      };
-      mapa[key].count++;
-    });
-
-    const list = Object.values(mapa).sort((a,b) => b.count - a.count);
-    if (!list.length) { document.getElementById('clientes-empty').style.display = 'block'; return; }
-    document.getElementById('clientes-tbl').style.display = 'table';
-
-    document.getElementById('clientes-tbody').innerHTML = list.map(c => `
-      <tr>
-        <td style="font-weight:500">${c.nombre}</td>
-        <td style="color:var(--text2)">${c.empresa}</td>
-        <td style="font-size:12px">${c.tel}</td>
-        <td style="font-size:12px">${c.email}</td>
-        <td><span style="font-family:'DM Mono',monospace;font-size:12px">${c.count}</span></td>
-      </tr>
-    `).join('');
-  } catch(e) {
-    document.getElementById('clientes-loading').style.display = 'none';
-    showToast('Error: ' + e.message, 'error');
-  }
+async function loadClientes(){
+  document.getElementById('cl').style.display='block';
+  document.getElementById('ctbl').style.display='none';
+  try{
+    const data=await api('/api/ventas?limit=200');
+    const vs=data.ventas||[];
+    document.getElementById('cl').style.display='none';
+    const m={};
+    vs.forEach(v=>{const k=(v.clienteEmpresa||v.clienteNombre||'').toLowerCase();if(!m[k])m[k]={n:v.clienteNombre||'&mdash;',e:v.clienteEmpresa||'&mdash;',t:v.clienteTel||'&mdash;',em:v.clienteEmail||'&mdash;',c:0};m[k].c++;});
+    const list=Object.values(m).sort((a,b)=>b.c-a.c);
+    if(!list.length){document.getElementById('ce').style.display='block';return;}
+    document.getElementById('ctbl').style.display='table';
+    document.getElementById('ctbody').innerHTML=list.map(c=>'<tr><td style="font-weight:500">'+c.n+'</td><td style="color:var(--t2)">'+c.e+'</td><td style="font-size:12px">'+c.t+'</td><td style="font-size:12px">'+c.em+'</td><td><span style="font-family:var(--mono);font-size:12px">'+c.c+'</span></td></tr>').join('');
+  }catch(e){document.getElementById('cl').style.display='none';toast('Error: '+e.message,'err');}
 }
 
-// ── NUEVA VENTA ──────────────────────────────────────────────────────────────
-function initNuevaVenta() {
-  const hoy = new Date().toISOString().split('T')[0];
-  document.getElementById('nv-fecha').value = hoy;
-  if (!document.getElementById('items-tbody').children.length) addItem();
+async function verR(id){
+  try{
+    const v=await api('/api/ventas/'+id);
+    VA=v;
+    document.getElementById('mt').textContent='Remito '+v.numero;
+    const un=(v.unidad||'').toUpperCase().includes('ACERO')?'Acero Inoxidables':'ABCTechos';
+    const uw=(v.unidad||'').toUpperCase().includes('ACERO')?'acerosinoxidables.com.ar':'abctechos.com';
+    const f=new Date(v.fecha).toLocaleDateString('es-AR');
+    const rows=(v.items||[]).map(i=>'<tr><td>'+i.descripcion+'</td><td>'+i.cantidad+' '+(i.unidad||'un')+'</td><td style="text-align:right">$'+Number(i.precioUnit||0).toLocaleString('es-AR')+'</td><td style="text-align:right;font-weight:700">$'+Number(i.total||i.cantidad*i.precioUnit||0).toLocaleString('es-AR')+'</td></tr>').join('');
+    document.getElementById('mb').innerHTML='<div class="rp" id="rprint"><div class="rpt"><div><div class="rpe">'+un+'</div><div class="rps">'+uw+' &middot; Santa Rosa 4025, Victoria</div><div class="rps">CUIT: 33-71869015-9 &middot; IVA Responsable Inscripto</div></div><div><div class="rpn">'+v.numero+'</div><div class="rps" style="text-align:right">Fecha: '+f+'</div><div class="rps" style="text-align:right">Canal: '+cp(v.canal)+'</div></div></div><div class="rpg"><div><div class="rpl">Cliente</div><div style="font-weight:700;font-size:13px">'+(v.clienteEmpresa||v.clienteNombre||'&mdash;')+'</div>'+(v.clienteEmpresa?'<div style="font-size:12px;color:#777">'+v.clienteNombre+'</div>':'')+(v.clienteTel?'<div style="font-size:12px;color:#777">Tel: '+v.clienteTel+'</div>':'')+(v.clienteEmail?'<div style="font-size:12px;color:#777">'+v.clienteEmail+'</div>':'')+'</div><div><div class="rpl">Direcci&oacute;n de entrega</div><div style="font-size:13px">'+(v.dirCalle||'&mdash;')+'</div><div style="font-size:12px;color:#777">'+[v.dirLocalidad,v.dirProvincia,v.dirCP].filter(Boolean).join(' &middot;')+'</div><div style="font-size:12px;margin-top:4px"><strong>Transporte:</strong> '+(v.transporteNombre||'A definir')+'</div></div></div><table class="rptbl"><thead><tr><th>Descripci&oacute;n</th><th>Cantidad</th><th style="text-align:right">Precio unit.</th><th style="text-align:right">Total</th></tr></thead><tbody>'+rows+'</tbody></table><div class="rptot">Total: $'+(v.total?Number(v.total).toLocaleString('es-AR'):'&mdash;')+'</div>'+(v.notas?'<div style="margin-top:10px;font-size:12px;color:#777;border-top:1px solid #eee;padding-top:8px">Notas: '+v.notas+'</div>':'')+'</div>';
+    renderEB(v.id,v.estado);
+    document.getElementById('modal').classList.add('open');
+  }catch(e){toast('Error: '+e.message,'err');}
 }
 
-function setUnidad(u) {
-  selectedUnidad = u;
-  document.getElementById('tab-abc').classList.toggle('active', u === 'abc');
-  document.getElementById('tab-acero').classList.toggle('active', u === 'acero');
+function renderEB(id,estadoActual){
+  const e=(estadoActual||'PENDIENTE').toUpperCase(),fl=FL[e]||[];
+  const c=document.getElementById('ebs');
+  if(!fl.length){c.innerHTML='<span style="font-size:12px;color:var(--t3)">No hay m&aacute;s cambios disponibles.</span>';return;}
+  c.innerHTML=fl.map(s=>{const ex=ES[s],cl=BC[s]||'';return '<button class="btn '+cl+' btn-sm" onclick="chE(\''+id+'\',\''+s+'\',\''+VA?.numero+'\')">'+ex.i+' Marcar como '+ex.l+'</button>';}).join('');
 }
 
-function addItem() {
-  itemCount++;
-  const tr = document.createElement('tr');
-  tr.id = 'item-' + itemCount;
-  tr.innerHTML = `
-    <td><input type="text" placeholder="Chapa sinusoidal 0.4mm..." style="width:100%"></td>
-    <td><input type="number" min="1" value="1" style="width:70px" oninput="calcTotal()"></td>
-    <td>
-      <select style="width:75px">
-        <option>un</option><option>m²</option><option>ml</option><option>kg</option><option>m</option>
-      </select>
-    </td>
-    <td><input type="number" min="0" value="0" placeholder="0" oninput="calcTotal()"></td>
-    <td class="item-total item-total-${itemCount}">$0</td>
-    <td><button onclick="removeItem(${itemCount})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;line-height:1">×</button></td>
-  `;
-  document.getElementById('items-tbody').appendChild(tr);
+function printPDF(){if(VA)window.open(API+'/api/ventas/'+VA.id+'/remito-pdf','_blank');}
+function printR(){
+  const a=document.getElementById('rprint');
+  if(!a)return;
+  const w=window.open('','_blank');
+  w.document.write('<html><head><title>Remito</title><link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>*{box-sizing:border-box}body{font-family:\'Instrument Sans\',Arial,sans-serif;padding:24px;color:#111}.rpt{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:1.5px solid #e5e5e5;margin-bottom:14px}.rpe{font-size:16px;font-weight:700}.rps{font-size:11px;color:#888;margin-top:2px}.rpn{font-size:18px;font-weight:800;text-align:right}.rpg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.rpl{font-size:10px;font-weight:700;text-transform:uppercase;color:#999;letter-spacing:.5px;margin-bottom:4px}.rptbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}.rptbl th{font-size:10px;font-weight:700;text-transform:uppercase;color:#888;border-bottom:1px solid #ddd;padding:5px 8px;text-align:left}.rptbl td{padding:8px;border-bottom:1px solid #f0f0f0}.rptot{text-align:right;font-weight:800;font-size:16px;padding-top:10px;border-top:1.5px solid #e5e5e5}@media print{body{padding:8px}}</style></head><body>'+a.innerHTML+'</body></html>');
+  w.document.close();
+  setTimeout(()=>w.print(),400);
 }
+function closeM(){document.getElementById('modal').classList.remove('open');VA=null;}
 
-function removeItem(id) {
-  const el = document.getElementById('item-' + id);
-  if (el) el.remove();
-  calcTotal();
+function initF(){document.getElementById('nv-f').value=new Date().toISOString().split('T')[0];if(!document.getElementById('itb').children.length)addI();}
+function setU(u){selU=u;document.getElementById('tab-abc').classList.toggle('active',u==='abc');document.getElementById('tab-acero').classList.toggle('active',u==='acero');}
+function addI(){
+  iC++;
+  const tr=document.createElement('tr');tr.id='i'+iC;
+  tr.innerHTML='<td><input type="text" placeholder="Chapa sinusoidal 0.4mm..." style="width:100%"></td><td><input type="number" min="1" value="1" style="width:68px" oninput="calcT()"></td><td><select style="width:72px"><option>un</option><option>m²</option><option>ml</option><option>kg</option><option>m</option></select></td><td><input type="number" min="0" value="0" oninput="calcT()"></td><td class="itc" id="it'+iC+'">$0</td><td><button onclick="remI('+iC+')" style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:16px;line-height:1">×</button></td>';
+  document.getElementById('itb').appendChild(tr);
 }
-
-function calcTotal() {
-  let total = 0;
-  document.querySelectorAll('#items-tbody tr').forEach(tr => {
-    const nums = tr.querySelectorAll('input[type="number"]');
-    if (nums.length >= 2) {
-      const cant = parseFloat(nums[0].value) || 0;
-      const precio = parseFloat(nums[1].value) || 0;
-      const sub = cant * precio;
-      total += sub;
-      const id = tr.id.replace('item-', '');
-      const el = tr.querySelector('.item-total-' + id);
-      if (el) el.textContent = '$' + sub.toLocaleString('es-AR');
-    }
+function remI(id){const el=document.getElementById('i'+id);if(el)el.remove();calcT();}
+function calcT(){
+  let tot=0;
+  document.querySelectorAll('#itb tr').forEach(tr=>{
+    const ns=tr.querySelectorAll('input[type="number"]');
+    if(ns.length>=2){const s=(parseFloat(ns[0].value)||0)*(parseFloat(ns[1].value)||0);tot+=s;const id=tr.id.replace('i','');const el=document.getElementById('it'+id);if(el)el.textContent='$'+s.toLocaleString('es-AR');}
   });
-  document.getElementById('nv-subtotal').textContent = '$' + total.toLocaleString('es-AR');
+  document.getElementById('nv-tot').textContent='$'+tot.toLocaleString('es-AR');
 }
-
-let logisticaTimeout = null;
-function debounceLogistica() {
-  clearTimeout(logisticaTimeout);
-  logisticaTimeout = setTimeout(calcLogistica, 600);
-}
-
-function calcLogistica() {
-  const provincia = document.getElementById('nv-provincia').value;
-  const canal = document.getElementById('nv-canal').value;
-  const panel = document.getElementById('logistica-panel');
-  if (!provincia) { panel.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:12px 0">Seleccioná la provincia para ver opciones.</div>'; return; }
-
-  if (canal === 'MERCADOLIBRE') {
-    panel.innerHTML = `
-      <div class="logistica-box">
-        <div class="lbl">Canal detectado</div>
-        <div class="val">Mercado Libre</div>
-        <div class="sub">Entregar en punto ML cercano a Santa Rosa 4025, Victoria, San Fernando</div>
-      </div>
-      <div class="logistica-box">
-        <div class="lbl">Transporte</div>
-        <div class="transport-opts">
-          <div class="transport-opt selected" onclick="selectTransport('correoml',this)">
-            <div class="t-icon">📦</div><div class="t-name">Correo ML</div><div class="t-detail">Punto ML Victoria</div>
-          </div>
-          <div class="transport-opt" onclick="selectTransport('hilux',this)">
-            <div class="t-icon">🛻</div><div class="t-name">Hilux</div><div class="t-detail">Entrega directa</div>
-          </div>
-        </div>
-      </div>`;
-    selectedTransport = 'correoml';
-    return;
+let lt=null;
+function dL(){clearTimeout(lt);lt=setTimeout(calcL,500);}
+function calcL(){
+  const p=document.getElementById('nv-p').value,ch=document.getElementById('nv-ch').value,panel=document.getElementById('lpanel');
+  if(!p){panel.innerHTML='<div style="color:var(--t3);font-size:13px;padding:10px 0">Seleccion\u00e1 la provincia para ver opciones.</div>';return;}
+  if(ch==='MERCADOLIBRE'){
+    panel.innerHTML='<div class="lpanel"><div style="font-size:12px;font-weight:700;margin-bottom:10px">Mercado Libre &mdash; entrega en punto cercano</div><div class="ibox">Coordinar entrega en punto ML cercano a Santa Rosa 4025, Victoria, San Fernando.</div><div class="tgrid"><div class="topt sel" onclick="sT(\'correoml\',this)"><div class="ti">&#128230;</div><div class="tn">Correo ML</div><div class="td">Punto ML Victoria</div></div><div class="topt" onclick="sT(\'hilux\',this)"><div class="ti">&#128667;</div><div class="tn">Hilux</div><div class="td">Entrega directa</div></div></div></div>';
+    selT='correoml';return;
   }
-
-  const opts = TRANSPORT_RULES[provincia] || TRANSPORT_RULES.interior;
-  selectedTransport = opts[0].id;
-  const zonaLabel = { caba: 'Capital Federal', buenos_aires_gba: 'Gran Buenos Aires', interior: 'Interior del país' }[provincia];
-
-  let html = `<div class="logistica-box">
-    <div class="lbl">Zona detectada</div>
-    <div class="val">${zonaLabel}</div>
-  </div>
-  <div class="logistica-box">
-    <div class="lbl">Transporte recomendado</div>
-    <div class="transport-opts">
-    ${opts.map((t, i) => `
-      <div class="transport-opt ${i===0?'selected':''}" onclick="selectTransport('${t.id}',this)">
-        <div class="t-icon">${t.icon}</div>
-        <div class="t-name">${t.name}</div>
-        <div class="t-detail">${t.detail}</div>
-      </div>`).join('')}
-    </div>
-  </div>`;
-
-  if (provincia === 'interior') {
-    html += '<div class="alert alert-info">Interior: verificar terminal de transporte más cercana al destino.</div>';
-  }
-
-  panel.innerHTML = html;
+  const opts=TR[p]||TR.interior;const zonas={caba:'Capital Federal',buenos_aires_gba:'Gran Buenos Aires',interior:'Interior del pa\u00eds'};
+  selT=opts[0].id;
+  panel.innerHTML='<div class="lpanel"><div style="font-size:12px;color:var(--t2);margin-bottom:10px">Zona: <strong style="color:var(--t)">'+zonas[p]+'</strong></div><div class="tgrid">'+opts.map((t,i)=>'<div class="topt '+(i===0?'sel':'')+'" onclick="sT(\''+t.id+'\',this)"><div class="ti">'+t.i+'</div><div class="tn">'+t.n+'</div><div class="td">'+t.d+'</div></div>').join('')+'</div>'+(p==='interior'?'<div class="ibox" style="margin-top:8px">Verificar terminal de transporte m\u00e1s cercana al destino.</div>':'')+'</div>';
 }
-
-function selectTransport(id, el) {
-  selectedTransport = id;
-  el.closest('.transport-opts').querySelectorAll('.transport-opt').forEach(e => e.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
-function getItems() {
-  const items = [];
-  document.querySelectorAll('#items-tbody tr').forEach(tr => {
-    const inputs = tr.querySelectorAll('input');
-    const sel = tr.querySelectorAll('select');
-    const desc = inputs[0]?.value?.trim();
-    const cant = parseFloat(inputs[1]?.value) || 0;
-    const unidad = sel[0]?.value || 'un';
-    const precio = parseFloat(inputs[2]?.value) || 0;
-    if (desc) items.push({ descripcion: desc, cantidad: cant, unidad, precioUnit: precio });
+function sT(id,el){selT=id;el.closest('.tgrid').querySelectorAll('.topt').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
+function getIs(){
+  const items=[];
+  document.querySelectorAll('#itb tr').forEach(tr=>{
+    const ins=tr.querySelectorAll('input'),sls=tr.querySelectorAll('select');
+    const d=ins[0]?.value?.trim();
+    if(d)items.push({descripcion:d,cantidad:parseFloat(ins[1]?.value)||0,unidad:sls[0]?.value||'un',precioUnit:parseFloat(ins[2]?.value)||0});
   });
   return items;
 }
-
-async function guardarVenta() {
-  const cliente = document.getElementById('nv-cliente').value.trim();
-  const dir = document.getElementById('nv-dir').value.trim();
-  const localidad = document.getElementById('nv-localidad').value.trim();
-  const provincia = document.getElementById('nv-provincia').value;
-
-  if (!cliente) { showToast('Ingresá el nombre del cliente', 'error'); return; }
-  if (!dir) { showToast('Ingresá la dirección de entrega', 'error'); return; }
-  if (!provincia) { showToast('Seleccioná la provincia', 'error'); return; }
-
-  const items = getItems();
-  if (!items.length) { showToast('Agregá al menos un producto', 'error'); return; }
-
-  const total = items.reduce((a, i) => a + i.cantidad * i.precioUnit, 0);
-  const transporteNombre = {
-    hilux: 'Flota propia — Hilux',
-    accelo: 'Flota propia — Accelo',
-    correoml: 'Correo Mercado Libre',
-    andreani: 'Andreani',
-    oca: 'OCA',
-    transporte: 'Transporte de carga'
-  }[selectedTransport] || selectedTransport || 'A definir';
-
-  const body = {
-    canal: document.getElementById('nv-canal').value || 'LOCAL',
-    unidad: selectedUnidad === 'abc' ? 'ABCTECHOS' : 'ACEROINOXIDABLES',
-    cliente: {
-      nombre: cliente,
-      empresa: document.getElementById('nv-empresa').value.trim() || undefined,
-      email: document.getElementById('nv-email').value.trim() || undefined,
-      tel: document.getElementById('nv-tel').value.trim() || undefined,
-    },
-    direccion: {
-      calle: dir,
-      localidad: localidad || 'A confirmar',
-      provincia: { caba: 'Capital Federal', buenos_aires_gba: 'Buenos Aires (GBA)', interior: 'Interior' }[provincia] || provincia,
-      cp: document.getElementById('nv-cp').value.trim() || undefined,
-    },
-    items,
-    total,
-    notas: document.getElementById('nv-notas').value.trim() || undefined,
-  };
-
-  try {
-    const venta = await apiFetch('/api/ventas', { method: 'POST', body: JSON.stringify(body) });
-    showToast('✓ Venta guardada: ' + venta.numero, 'success');
-    resetForm();
-    verRemito(venta.id);
-  } catch(e) {
-    showToast('Error al guardar: ' + e.message, 'error');
-  }
+async function guardar(){
+  const c=document.getElementById('nv-c').value.trim();
+  const d=document.getElementById('nv-d').value.trim();
+  const p=document.getElementById('nv-p').value;
+  if(!c){toast('Ingres\u00e1 el nombre del cliente','err');return;}
+  if(!d){toast('Ingres\u00e1 la direcci\u00f3n','err');return;}
+  if(!p){toast('Selecci\u00f3n la provincia','err');return;}
+  const items=getIs();
+  if(!items.length){toast('Agreg\u00e1 al menos un producto','err');return;}
+  const total=items.reduce((a,i)=>a+i.cantidad*i.precioUnit,0);
+  const pm={caba:'Capital Federal',buenos_aires_gba:'Buenos Aires (GBA)',interior:'Interior'};
+  const body={canal:document.getElementById('nv-ch').value||'LOCAL',unidad:selU==='abc'?'ABCTECHOS':'ACEROINOXIDABLES',cliente:{nombre:c,empresa:document.getElementById('nv-e').value.trim()||undefined,email:document.getElementById('nv-em').value.trim()||undefined,tel:document.getElementById('nv-t').value.trim()||undefined},direccion:{calle:d,localidad:document.getElementById('nv-l').value.trim()||'A confirmar',provincia:pm[p]||p,cp:document.getElementById('nv-cp').value.trim()||undefined},items,total,notas:document.getElementById('nv-n').value.trim()||undefined};
+  try{const v=await api('/api/ventas',{method:'POST',body:JSON.stringify(body)});toast('\u2713 Venta '+v.numero+' guardada','ok');resetF();verR(v.id);}catch(e){toast('Error al guardar: '+e.message,'err');}
 }
-
-function resetForm() {
-  ['nv-cliente','nv-empresa','nv-tel','nv-email','nv-dir','nv-localidad','nv-cp','nv-notas'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  document.getElementById('nv-provincia').value = '';
-  document.getElementById('nv-canal').value = 'LOCAL';
-  document.getElementById('items-tbody').innerHTML = '';
-  itemCount = 0;
-  document.getElementById('nv-subtotal').textContent = '$0';
-  document.getElementById('logistica-panel').innerHTML = '<div style="color:var(--text3);font-size:13px;padding:12px 0">Completá la dirección y provincia para ver opciones de envío.</div>';
-  selectedTransport = null;
-  addItem();
+function resetF(){
+  ['nv-c','nv-e','nv-t','nv-em','nv-d','nv-l','nv-cp','nv-n'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('nv-p').value='';document.getElementById('nv-ch').value='LOCAL';
+  document.getElementById('itb').innerHTML='';iC=0;
+  document.getElementById('nv-tot').textContent='$0';
+  document.getElementById('lpanel').innerHTML='<div style="color:var(--t3);font-size:13px;padding:10px 0">Seleccion\u00e1 la provincia para ver opciones.</div>';
+  selT=null;addI();
 }
-
-// ── VER REMITO ───────────────────────────────────────────────────────────────
-async function verRemito(id) {
-  currentRemitoVentaId = id;
-  try {
-    const venta = await apiFetch('/api/ventas/' + id);
-    document.getElementById('modal-remito-title').textContent = 'Remito ' + venta.numero;
-
-    const unNombre = (venta.unidad || '').toUpperCase().includes('ACERO') ? 'Acero Inoxidables' : 'ABCTechos';
-    const unWeb = (venta.unidad || '').toUpperCase().includes('ACERO') ? 'acerosinoxidables.com.ar' : 'abctechos.com';
-    const transLabel = {
-      'Flota propia — Hilux': 'Hilux (flota propia)',
-      'Flota propia — Accelo': 'Accelo (flota propia)',
-    }[venta.transporteNombre] || venta.transporteNombre || 'A definir';
-
-    const rows = (venta.items || []).map(i => `
-      <tr>
-        <td>${i.descripcion}</td>
-        <td>${i.cantidad} ${i.unidad || 'un'}</td>
-        <td style="text-align:right">$${Number(i.precioUnit || 0).toLocaleString('es-AR')}</td>
-        <td style="text-align:right;font-weight:600">$${Number(i.total || i.cantidad * i.precioUnit || 0).toLocaleString('es-AR')}</td>
-      </tr>`).join('');
-
-    const total = venta.total ? Number(venta.total).toLocaleString('es-AR') : '—';
-    const fecha = new Date(venta.fecha).toLocaleDateString('es-AR');
-
-    document.getElementById('modal-remito-body').innerHTML = `
-      <div class="remito-preview" id="remito-print-area">
-        <div class="remito-top">
-          <div>
-            <div class="remito-empresa">${unNombre}</div>
-            <div class="remito-sub">${unWeb}</div>
-            <div class="remito-sub">Santa Rosa 4025, Victoria, San Fernando</div>
-            <div class="remito-sub">CUIT: 33-71869015-9 · IVA Responsable Inscripto</div>
-          </div>
-          <div style="text-align:right">
-            <div class="remito-num">${venta.numero}</div>
-            <div class="remito-sub">Fecha: ${fecha}</div>
-            <div class="remito-sub">Canal: ${canalLabelPlain(venta.canal)}</div>
-          </div>
-        </div>
-        <div class="remito-grid">
-          <div>
-            <div class="remito-section-label">Cliente</div>
-            <div style="font-weight:600;font-size:13px">${venta.clienteEmpresa || venta.clienteNombre || '—'}</div>
-            ${venta.clienteEmpresa ? `<div style="font-size:12px;color:#666">${venta.clienteNombre}</div>` : ''}
-            ${venta.clienteTel ? `<div style="font-size:12px;color:#666">Tel: ${venta.clienteTel}</div>` : ''}
-            ${venta.clienteEmail ? `<div style="font-size:12px;color:#666">${venta.clienteEmail}</div>` : ''}
-          </div>
-          <div>
-            <div class="remito-section-label">Dirección de entrega</div>
-            <div style="font-size:13px">${venta.dirCalle || '—'}</div>
-            <div style="font-size:12px;color:#666">${[venta.dirLocalidad, venta.dirProvincia, venta.dirCP].filter(Boolean).join(' · ')}</div>
-            <div style="font-size:12px;margin-top:4px"><strong>Transporte:</strong> ${transLabel}</div>
-          </div>
-        </div>
-        <table class="remito-tbl">
-          <thead><tr><th>Descripción</th><th>Cantidad</th><th style="text-align:right">Precio unit.</th><th style="text-align:right">Total</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-        <div class="remito-total">Total: $${total}</div>
-        ${venta.notas ? `<div style="margin-top:10px;font-size:12px;color:#666;border-top:1px solid #eee;padding-top:8px">Notas: ${venta.notas}</div>` : ''}
-      </div>
-    `;
-
-    document.getElementById('modal-remito').classList.add('open');
-  } catch(e) {
-    showToast('Error cargando remito: ' + e.message, 'error');
-  }
-}
-
-function imprimirRemito() {
-  const area = document.getElementById('remito-print-area');
-  if (!area) return;
-  const w = window.open('', '_blank');
-  w.document.write(`
-    <html><head><title>Remito</title>
-    <style>
-      body { font-family: 'DM Sans', Arial, sans-serif; padding: 20px; color: #111; }
-      * { box-sizing: border-box; }
-      .remito-preview { max-width: 700px; margin: 0 auto; }
-      .remito-top { display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid #ddd; margin-bottom: 14px; }
-      .remito-empresa { font-size: 15px; font-weight: 600; }
-      .remito-sub { font-size: 11px; color: #666; }
-      .remito-num { font-size: 18px; font-weight: 700; text-align: right; }
-      .remito-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
-      .remito-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #999; letter-spacing: 0.5px; margin-bottom: 4px; }
-      .remito-tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0; }
-      .remito-tbl th { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #888; border-bottom: 1px solid #ddd; padding: 6px 8px; text-align: left; }
-      .remito-tbl td { padding: 8px 8px; border-bottom: 1px solid #eee; }
-      .remito-total { text-align: right; font-weight: 700; font-size: 15px; padding-top: 8px; border-top: 1px solid #ddd; }
-      @media print { body { padding: 0; } }
-    </style></head>
-    <body><div class="remito-preview">${area.innerHTML}</div></body></html>
-  `);
-  w.document.close();
-  w.focus();
-  setTimeout(() => { w.print(); }, 300);
-}
-
-async function imprimirPDF(id, numero) {
-  const url = `${API}/api/ventas/${id}/remito-pdf`;
-  window.open(url, '_blank');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function canalLabel(canal) {
-  const map = {
-    MERCADOLIBRE: '<span class="badge b-ml">ML</span>',
-    TIENDANUBE:   '<span class="badge b-tn">TN</span>',
-    WOOCOMMERCE:  '<span class="badge b-wc">WC</span>',
-    LOCAL:        '<span class="badge b-local">Local</span>',
-    WHATSAPP:     '<span class="badge b-local">WPP</span>',
-  };
-  return map[canal] || `<span class="badge b-local">${canal || '—'}</span>`;
-}
-
-function canalLabelPlain(canal) {
-  const map = { MERCADOLIBRE:'Mercado Libre', TIENDANUBE:'Tiendanube', WOOCOMMERCE:'WooCommerce', LOCAL:'Local', WHATSAPP:'WhatsApp' };
-  return map[canal] || canal || '—';
-}
-
-function estadoLabel(estado) {
-  const map = {
-    PENDIENTE: '<span class="badge b-pend">Pendiente</span>',
-    TRANSITO:  '<span class="badge b-trans">En tránsito</span>',
-    ENTREGADO: '<span class="badge b-entr">Entregado</span>',
-    CANCELADO: '<span class="badge" style="background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.25)">Cancelado</span>',
-  };
-  return map[(estado || '').toUpperCase()] || `<span class="badge b-local">${estado || '—'}</span>`;
-}
-
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + type;
-  setTimeout(() => { t.className = 'toast'; }, 3500);
-}
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
+function toast(msg,type=''){const t=document.getElementById('toast');t.innerHTML=msg;t.className='toast show '+(type||'');setTimeout(()=>{t.className='toast';},3500);}
 loadDashboard();
 </script>
 </body>
