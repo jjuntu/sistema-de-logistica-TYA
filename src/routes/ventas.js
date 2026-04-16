@@ -83,7 +83,22 @@ router.get('/:id/remito-pdf', async (req, res) => {
 });
 
 // GET /api/ventas/:id
-router.get('/:id', async (req, res) => {router.get('/limpiar-pruebas', async (req, res) => {
+// GET /api/ventas/limpiar-pruebas — TEMPORAL
+router.get('/limpiar-pruebas', async (req, res) => {
+  try {
+    const ids = (await prisma.venta.findMany({
+      where: { numero: { in: ['R0001','R0002','R0003'] } },
+      select: { id: true }
+    })).map(v => v.id);
+    await prisma.eventoVenta.deleteMany({ where: { ventaId: { in: ids } } });
+    await prisma.itemVenta.deleteMany({ where: { ventaId: { in: ids } } });
+    const r = await prisma.venta.deleteMany({ where: { id: { in: ids } } });
+    res.json({ ok: true, borrados: r.count });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/ventas/:id
+router.get('/:id', async (req, res) => {
   try {
     const ids = (await prisma.venta.findMany({
       where: { numero: { in: ['R0001','R0002','R0003'] } },
