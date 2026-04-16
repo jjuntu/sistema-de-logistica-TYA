@@ -130,4 +130,19 @@ router.get('/stats/resumen', async (req, res) => {
   }
 });
 
+// TEMPORAL - borrar después de usar
+router.delete('/limpiar-pruebas', async (req, res) => {
+  const { PrismaClient } = require('@prisma/client');
+  const prisma = new PrismaClient();
+  const ids = await prisma.venta.findMany({
+    where: { numero: { in: ['R0001', 'R0002', 'R0003'] } },
+    select: { id: true }
+  });
+  const ventaIds = ids.map(v => v.id);
+  await prisma.eventoVenta.deleteMany({ where: { ventaId: { in: ventaIds } } });
+  await prisma.itemVenta.deleteMany({ where: { ventaId: { in: ventaIds } } });
+  await prisma.venta.deleteMany({ where: { id: { in: ventaIds } } });
+  res.json({ ok: true, borrados: ventaIds.length });
+});
+
 module.exports = router;
