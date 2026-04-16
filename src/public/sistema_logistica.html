@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SisLogística — ABCTechos · Acero Inox</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --bg2: #161616;
+  --bg3: #1e1e1e;
+  --bg4: #252525;
+  --border: #2a2a2a;
+  --border2: #333;
+  --text: #f0f0f0;
+  --text2: #999;
+  --text3: #666;
+  --accent: #e8ff47;
+  --accent2: #ff6b35;
+  --abc: #7c6dfa;
+  --acero: #fa6d3f;
+  --green: #4ade80;
+  --yellow: #fbbf24;
+  --blue: #60a5fa;
+  --red: #f87171;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.sidebar-brand {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.brand-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.brand-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+.nav {
+  flex: 1;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: var(--bg4); color: var(--text); font-weight: 500; }
+.nav-item.active .nav-dot { background: var(--accent); }
+
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border2);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.nav-icon { font-size: 15px; flex-shrink: 0; }
+
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-right: 6px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+.page-title { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
+.page-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+.content { padding: 24px; flex: 1; }
+
+/* ── PAGE VISIBILITY ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── METRICS ── */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.metric {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.metric.m-hoy::before { background: var(--accent); }
+.metric.m-pend::before { background: var(--yellow); }
+.metric.m-trans::before { background: var(--blue); }
+.metric.m-entr::before { background: var(--green); }
+
+.metric-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.metric-value { font-size: 28px; font-weight: 600; color: var(--text); font-family: 'DM Mono', monospace; letter-spacing: -1px; }
+.metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+}
+
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title { font-size: 13px; font-weight: 600; }
+.card-body { padding: 0; }
+
+/* ── TABLE ── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th {
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+.tbl td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--bg3); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-family: 'DM Mono', monospace;
+}
+.b-pend { background: rgba(251,191,36,0.15); color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
+.b-trans { background: rgba(96,165,250,0.15); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+.b-entr { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+.b-abc { background: rgba(124,109,250,0.15); color: var(--abc); border: 1px solid rgba(124,109,250,0.25); }
+.b-acero { background: rgba(250,109,63,0.15); color: var(--acero); border: 1px solid rgba(250,109,63,0.25); }
+.b-ml { background: rgba(255,199,0,0.15); color: #ffc700; border: 1px solid rgba(255,199,0,0.25); }
+.b-tn { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+.b-wc { background: rgba(155,81,224,0.15); color: #a855f7; border: 1px solid rgba(155,81,224,0.25); }
+.b-local { background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.25); }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--bg4); border-color: var(--text3); }
+.btn-accent { background: var(--accent); color: #000; border-color: var(--accent); }
+.btn-accent:hover { background: #d4eb3e; }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--text2); }
+.btn-ghost:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+
+/* ── DESPACHO KANBAN ── */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.kanban-col { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.kanban-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kanban-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.kanban-count {
+  font-size: 11px;
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text2);
+}
+.kanban-body { padding: 12px; min-height: 200px; }
+
+.kcard {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 8px;
+  transition: border-color 0.15s;
+}
+.kcard:hover { border-color: var(--border2); }
+.kcard-id { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text2); margin-bottom: 4px; }
+.kcard-cliente { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.kcard-dir { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
+.kcard-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ── FORM ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 4px; }
+.form-group label { font-size: 11px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  background: var(--bg3);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.15s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.form-group select option { background: var(--bg3); }
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 16px 0 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+
+/* ── ITEMS TABLE ── */
+.items-tbl { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 8px; }
+.items-tbl th { font-size: 11px; color: var(--text3); padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.4px; }
+.items-tbl td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.items-tbl td input,
+.items-tbl td select {
+  padding: 5px 8px;
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  font-size: 12px;
+  background: var(--bg3);
+  color: var(--text);
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+}
+.items-tbl td input:focus, .items-tbl td select:focus { outline: none; border-color: var(--accent); }
+.item-total { font-family: 'DM Mono', monospace; color: var(--accent); font-size: 12px; }
+
+/* ── LOGISTICA PANEL ── */
+.logistica-box {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.logistica-box .lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+.logistica-box .val { font-size: 14px; font-weight: 500; }
+.logistica-box .sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+.transport-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.transport-opt {
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 10px 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.transport-opt:hover { border-color: var(--text3); background: var(--bg4); }
+.transport-opt.selected { border-color: var(--accent); background: rgba(232,255,71,0.06); }
+.t-icon { font-size: 18px; margin-bottom: 4px; }
+.t-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.t-detail { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-title { font-size: 16px; font-weight: 600; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text2); line-height: 1; }
+.modal-close:hover { color: var(--text); }
+
+/* ── REMITO PREVIEW ── */
+.remito-preview {
+  background: #fff;
+  color: #111;
+  border-radius: var(--radius);
+  padding: 20px;
+  font-family: 'DM Sans', sans-serif;
+}
+.remito-preview * { color: #111 !important; }
+.remito-top { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 14px; border-bottom: 1px solid #ddd; margin-bottom: 14px; }
+.remito-empresa { font-size: 13px; font-weight: 600; }
+.remito-sub { font-size: 11px; color: #666 !important; }
+.remito-num { font-size: 15px; font-weight: 700; text-align: right; }
+.remito-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.remito-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #999 !important; letter-spacing: 0.5px; margin-bottom: 4px; }
+.remito-tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0; }
+.remito-tbl th { font-size: 10px; font-weight: 600; text-transform: uppercase; color: #888 !important; border-bottom: 1px solid #ddd; padding: 5px 8px; text-align: left; }
+.remito-tbl td { padding: 7px 8px; border-bottom: 1px solid #eee; font-size: 12px; }
+.remito-total { text-align: right; font-weight: 700; font-size: 14px; padding-top: 8px; border-top: 1px solid #ddd; }
+
+/* ── UNIDAD TABS ── */
+.unidad-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.unidad-tab {
+  padding: 7px 16px;
+  font-size: 13px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  cursor: pointer;
+  background: none;
+  color: var(--text2);
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+}
+.unidad-tab:hover { background: var(--bg3); color: var(--text); }
+.unidad-tab.active.abc { background: rgba(124,109,250,0.15); color: var(--abc); border-color: rgba(124,109,250,0.4); }
+.unidad-tab.active.acero { background: rgba(250,109,63,0.15); color: var(--acero); border-color: rgba(250,109,63,0.4); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.25s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { border-color: var(--green); }
+.toast.error { border-color: var(--red); }
+
+/* ── EMPTY STATE ── */
+.empty { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+.empty-icon { font-size: 32px; margin-bottom: 10px; }
+
+/* ── LOADING ── */
+.loading { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 10px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+.form-nueva { max-width: 900px; }
+.total-bar {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.total-label { font-size: 12px; color: var(--text2); }
+.total-value { font-size: 18px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--accent); }
+
+.alert {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  margin-bottom: 12px;
+  border: 1px solid;
+}
+.alert-info { background: rgba(96,165,250,0.08); color: var(--blue); border-color: rgba(96,165,250,0.2); }
+.alert-success { background: rgba(74,222,128,0.08); color: var(--green); border-color: rgba(74,222,128,0.2); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <div class="brand-icon">🏗</div>
+      <div class="brand-name">SisLogística</div>
+    </div>
+    <div class="brand-sub">ABCTechos · AceroInox</div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+      <span class="nav-icon">⬛</span> Panel
+      <span class="nav-dot"></span>
+    </button>
+    <button class="nav-item" id="nav-despacho" onclick="showPage('despacho')">
+      <span class="nav-icon">🚚</span> Despacho
+      <span class="nav-dot"></span>
+    </button>
+    <button class="nav-item" id="nav-nueva-venta" onclick="showPage('nueva-venta')">
+      <span class="nav-icon">＋</span> Nueva venta
+      <span class="nav-dot"></span>
+    </button>
+    <button class="nav-item" id="nav-remitos" onclick="showPage('remitos')">
+      <span class="nav-icon">📄</span> Remitos
+      <span class="nav-dot"></span>
+    </button>
+    <button class="nav-item" id="nav-clientes" onclick="showPage('clientes')">
+      <span class="nav-icon">👤</span> Clientes
+      <span class="nav-dot"></span>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <span class="status-dot"></span>Backend online
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Panel de control</div>
+        <div class="page-sub" id="dashboard-fecha"></div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">↻ Actualizar</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="metrics">
+        <div class="metric m-hoy">
+          <div class="metric-label">Ventas hoy</div>
+          <div class="metric-value" id="m-hoy">—</div>
+          <div class="metric-sub">desde 00:00 hs</div>
+        </div>
+        <div class="metric m-pend">
+          <div class="metric-label">Pendientes</div>
+          <div class="metric-value" id="m-pend">—</div>
+          <div class="metric-sub">sin despachar</div>
+        </div>
+        <div class="metric m-trans">
+          <div class="metric-label">En tránsito</div>
+          <div class="metric-value" id="m-trans">—</div>
+          <div class="metric-sub">en camino</div>
+        </div>
+        <div class="metric m-entr">
+          <div class="metric-label">Entregados</div>
+          <div class="metric-value" id="m-entr">—</div>
+          <div class="metric-sub">completados</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Ventas recientes</div>
+          <div style="display:flex;gap:8px">
+            <select id="filtro-canal" onchange="loadDashboard()" style="padding:5px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif">
+              <option value="">Todos los canales</option>
+              <option value="MERCADOLIBRE">Mercado Libre</option>
+              <option value="TIENDANUBE">Tiendanube</option>
+              <option value="WOOCOMMERCE">WooCommerce</option>
+              <option value="LOCAL">Local / WPP</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="dashboard-loading" class="loading"><div class="spinner"></div>Cargando ventas...</div>
+          <table class="tbl" id="dashboard-tbl" style="display:none">
+            <thead>
+              <tr>
+                <th>Remito</th>
+                <th>Cliente</th>
+                <th>Unidad</th>
+                <th>Canal</th>
+                <th>Destino</th>
+                <th>Transporte</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-tbody"></tbody>
+          </table>
+          <div id="dashboard-empty" class="empty" style="display:none">
+            <div class="empty-icon">📭</div>
+            No hay ventas aún
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESPACHO -->
+  <div class="page" id="page-despacho">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Despacho</div>
+        <div class="page-sub">Gestión de entregas</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadDespacho()">↻ Actualizar</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="kanban">
+        <div class="kanban-col">
+          <div class="kanban-header">
+            <span class="kanban-title" style="color:var(--yellow)">● Pendientes</span>
+            <span class="kanban-count" id="k-pend-count">0</span>
+          </div>
+          <div class="kanban-body" id="k-pend"></div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-header">
+            <span class="kanban-title" style="color:var(--blue)">● En tránsito</span>
+            <span class="kanban-count" id="k-trans-count">0</span>
+          </div>
+          <div class="kanban-body" id="k-trans"></div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-header">
+            <span class="kanban-title" style="color:var(--green)">● Entregados</span>
+            <span class="kanban-count" id="k-entr-count">0</span>
+          </div>
+          <div class="kanban-body" id="k-entr"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUEVA VENTA -->
+  <div class="page" id="page-nueva-venta">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Nueva venta manual</div>
+        <div class="page-sub">WhatsApp, mostrador, teléfono</div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="form-nueva">
+        <div class="unidad-tabs">
+          <button class="unidad-tab abc active" id="tab-abc" onclick="setUnidad('abc')">ABCTechos</button>
+          <button class="unidad-tab acero" id="tab-acero" onclick="setUnidad('acero')">Acero Inoxidables</button>
+        </div>
+
+        <div class="section-label">Datos del cliente</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre / Razón social *</label>
+            <input type="text" id="nv-cliente" placeholder="Juan Pérez" list="clientes-list" autocomplete="off">
+            <datalist id="clientes-list"></datalist>
+          </div>
+          <div class="form-group">
+            <label>Empresa (opcional)</label>
+            <input type="text" id="nv-empresa" placeholder="Constructora SA">
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="text" id="nv-tel" placeholder="11 1234-5678">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="nv-email" placeholder="cliente@email.com">
+          </div>
+        </div>
+
+        <div class="section-label">Dirección de entrega</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Calle y número *</label>
+            <input type="text" id="nv-dir" placeholder="Av. San Martín 1234" oninput="debounceLogistica()">
+          </div>
+          <div class="form-group">
+            <label>Localidad *</label>
+            <input type="text" id="nv-localidad" placeholder="Ramos Mejía" oninput="debounceLogistica()">
+          </div>
+          <div class="form-group">
+            <label>Provincia *</label>
+            <select id="nv-provincia" onchange="calcLogistica()">
+              <option value="">— Seleccionar —</option>
+              <option value="caba">Capital Federal</option>
+              <option value="buenos_aires_gba">Buenos Aires (GBA)</option>
+              <option value="interior">Interior del país</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Código postal</label>
+            <input type="text" id="nv-cp" placeholder="1704">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Canal de venta</label>
+            <select id="nv-canal" onchange="calcLogistica()">
+              <option value="LOCAL">Mostrador / Presencial</option>
+              <option value="WHATSAPP">WhatsApp</option>
+              <option value="TELEFONO">Teléfono</option>
+              <option value="MERCADOLIBRE">Mercado Libre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" id="nv-fecha">
+          </div>
+        </div>
+
+        <div class="section-label">Productos</div>
+        <table class="items-tbl">
+          <thead>
+            <tr>
+              <th style="width:40%">Descripción</th>
+              <th style="width:12%">Cantidad</th>
+              <th style="width:10%">Unidad</th>
+              <th style="width:16%">Precio unit.</th>
+              <th style="width:14%">Total</th>
+              <th style="width:8%"></th>
+            </tr>
+          </thead>
+          <tbody id="items-tbody"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addItem()" style="margin-bottom:12px">＋ Agregar producto</button>
+
+        <div class="total-bar">
+          <span class="total-label">Total de la venta</span>
+          <span class="total-value" id="nv-subtotal">$0</span>
+        </div>
+
+        <div class="section-label" style="margin-top:16px">Logística recomendada</div>
+        <div id="logistica-panel">
+          <div style="color:var(--text3);font-size:13px;padding:12px 0">Completá la dirección y provincia para ver opciones de envío.</div>
+        </div>
+
+        <div class="section-label">Notas internas</div>
+        <div class="form-group">
+          <textarea id="nv-notas" rows="2" placeholder="Instrucciones de entrega, referencias, etc."></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn btn-accent" onclick="guardarVenta()">✓ Guardar venta</button>
+          <button class="btn btn-ghost" onclick="resetForm()">Limpiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REMITOS -->
+  <div class="page" id="page-remitos">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Remitos</div>
+        <div class="page-sub">Historial de comprobantes</div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="card-body">
+          <div id="remitos-loading" class="loading"><div class="spinner"></div>Cargando...</div>
+          <table class="tbl" id="remitos-tbl" style="display:none">
+            <thead>
+              <tr>
+                <th>Remito</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Unidad</th>
+                <th>Canal</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="remitos-tbody"></tbody>
+          </table>
+          <div id="remitos-empty" class="empty" style="display:none">
+            <div class="empty-icon">📄</div>
+            No hay remitos aún
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENTES -->
+  <div class="page" id="page-clientes">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Clientes</div>
+        <div class="page-sub">Historial de compradores</div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="card-body">
+          <div id="clientes-loading" class="loading"><div class="spinner"></div>Cargando...</div>
+          <table class="tbl" id="clientes-tbl" style="display:none">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Empresa</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Compras</th>
+              </tr>
+            </thead>
+            <tbody id="clientes-tbody"></tbody>
+          </table>
+          <div id="clientes-empty" class="empty" style="display:none">
+            <div class="empty-icon">👤</div>
+            No hay clientes aún
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODAL REMITO -->
+<div class="modal-overlay" id="modal-remito">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-remito-title">Remito</div>
+      <button class="modal-close" onclick="closeModal('modal-remito')">×</button>
+    </div>
+    <div id="modal-remito-body"></div>
+    <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+      <button class="btn btn-accent" onclick="imprimirRemito()">🖨 Imprimir remito</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-remito')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+const API = 'https://web-production-68d158.up.railway.app';
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let ventasCache = [];
+let selectedUnidad = 'abc';
+let selectedTransport = null;
+let itemCount = 0;
+let currentRemitoVentaId = null;
+
+const TRANSPORT_RULES = {
+  caba: [
+    { id:'hilux', name:'Hilux', detail:'Cargas livianas / urgente', icon:'🛻' },
+    { id:'accelo', name:'Accelo', detail:'Cargas grandes / chapas', icon:'🚛' },
+  ],
+  buenos_aires_gba: [
+    { id:'hilux', name:'Hilux', detail:'Hasta ~30km, cargas livianas', icon:'🛻' },
+    { id:'accelo', name:'Accelo', detail:'GBA, cargas grandes', icon:'🚛' },
+  ],
+  interior: [
+    { id:'andreani', name:'Andreani', detail:'Paquetes hasta 30kg', icon:'🟡' },
+    { id:'oca', name:'OCA', detail:'Envíos nacionales', icon:'🔵' },
+    { id:'transporte', name:'Transporte de carga', detail:'Cargas pesadas', icon:'🚚' },
+  ]
+};
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  if (id === 'dashboard')    loadDashboard();
+  if (id === 'despacho')     loadDespacho();
+  if (id === 'remitos')      loadRemitos();
+  if (id === 'clientes')     loadClientes();
+  if (id === 'nueva-venta')  initNuevaVenta();
+}
+
+// ── API ─────────────────────────────────────────────────────────────────────
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API + path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts
+  });
+  if (!res.ok) throw new Error('Error ' + res.status);
+  return res.json();
+}
+
+// ── DASHBOARD ───────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  document.getElementById('dashboard-fecha').textContent =
+    new Date().toLocaleDateString('es-AR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  document.getElementById('dashboard-loading').style.display = 'block';
+  document.getElementById('dashboard-tbl').style.display = 'none';
+  document.getElementById('dashboard-empty').style.display = 'none';
+
+  try {
+    const canal = document.getElementById('filtro-canal').value;
+    const params = new URLSearchParams({ limit: 50 });
+    if (canal) params.set('canal', canal);
+
+    const [data, stats] = await Promise.all([
+      apiFetch('/api/ventas?' + params),
+      apiFetch('/api/ventas/stats/resumen')
+    ]);
+
+    ventasCache = data.ventas || [];
+    document.getElementById('m-hoy').textContent  = stats.hoy  ?? 0;
+    document.getElementById('m-pend').textContent = stats.pendientes ?? 0;
+    document.getElementById('m-trans').textContent = stats.transito ?? 0;
+    document.getElementById('m-entr').textContent  = stats.entregados ?? 0;
+
+    renderDashboardTable(ventasCache);
+  } catch(e) {
+    showToast('Error cargando datos: ' + e.message, 'error');
+    document.getElementById('dashboard-loading').style.display = 'none';
+  }
+}
+
+function renderDashboardTable(ventas) {
+  document.getElementById('dashboard-loading').style.display = 'none';
+
+  if (!ventas.length) {
+    document.getElementById('dashboard-empty').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('dashboard-tbl').style.display = 'table';
+  const tbody = document.getElementById('dashboard-tbody');
+  tbody.innerHTML = ventas.slice(0, 30).map(v => {
+    const unBadge = (v.unidad || '').toUpperCase().includes('ACERO') ?
+      '<span class="badge b-acero">Acero Inox</span>' :
+      '<span class="badge b-abc">ABCTechos</span>';
+    const canalBadge = canalLabel(v.canal);
+    const estadoBadge = estadoLabel(v.estado);
+    const destino = [v.dirLocalidad, v.dirProvincia].filter(Boolean).join(', ') || v.dirCalle || '—';
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-weight:600">${v.numero}</td>
+      <td>${v.clienteEmpresa || v.clienteNombre || '—'}</td>
+      <td>${unBadge}</td>
+      <td>${canalBadge}</td>
+      <td style="font-size:12px;color:var(--text2)">${destino}</td>
+      <td style="font-size:12px">${v.transporteNombre || '—'}</td>
+      <td>${estadoBadge}</td>
+      <td>
+        <button class="btn btn-sm btn-ghost" onclick="verRemito('${v.id}')">Ver</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── DESPACHO ────────────────────────────────────────────────────────────────
+async function loadDespacho() {
+  try {
+    const data = await apiFetch('/api/ventas?limit=100');
+    const ventas = data.ventas || [];
+
+    ['PENDIENTE', 'TRANSITO', 'ENTREGADO'].forEach(estado => {
+      const key = estado.toLowerCase().replace('transito', 'trans').replace('pendiente', 'pend').replace('entregado', 'entr');
+      const col = document.getElementById('k-' + key);
+      const countEl = document.getElementById('k-' + key + '-count');
+      const items = ventas.filter(v => (v.estado || '').toUpperCase() === estado);
+      countEl.textContent = items.length;
+
+      if (!items.length) {
+        col.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0;text-align:center">Sin entregas</div>';
+        return;
+      }
+
+      col.innerHTML = items.map(v => {
+        const destino = [v.dirLocalidad, v.dirProvincia].filter(Boolean).join(', ') || v.dirCalle || '—';
+        let actions = '';
+        if (estado === 'PENDIENTE') actions += `<button class="btn btn-sm" onclick="cambiarEstado('${v.id}','TRANSITO')">🚚 Despachar</button>`;
+        if (estado === 'TRANSITO')  actions += `<button class="btn btn-sm" onclick="cambiarEstado('${v.id}','ENTREGADO')">✓ Entregado</button>`;
+        actions += `<button class="btn btn-sm btn-ghost" onclick="verRemito('${v.id}')">📄 Remito</button>`;
+        return `<div class="kcard">
+          <div class="kcard-id">${v.numero} · ${canalLabelPlain(v.canal)}</div>
+          <div class="kcard-cliente">${v.clienteEmpresa || v.clienteNombre || '—'}</div>
+          <div class="kcard-dir">${destino} · ${v.transporteNombre || 'sin transporte'}</div>
+          <div class="kcard-actions">${actions}</div>
+        </div>`;
+      }).join('');
+    });
+  } catch(e) {
+    showToast('Error cargando despacho: ' + e.message, 'error');
+  }
+}
+
+async function cambiarEstado(id, estado) {
+  try {
+    await apiFetch('/api/ventas/' + id + '/estado', {
+      method: 'PATCH',
+      body: JSON.stringify({ estado })
+    });
+    showToast('Estado actualizado ✓', 'success');
+    loadDespacho();
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+// ── REMITOS ─────────────────────────────────────────────────────────────────
+async function loadRemitos() {
+  document.getElementById('remitos-loading').style.display = 'block';
+  document.getElementById('remitos-tbl').style.display = 'none';
+  document.getElementById('remitos-empty').style.display = 'none';
+
+  try {
+    const data = await apiFetch('/api/ventas?limit=100');
+    const ventas = data.ventas || [];
+    document.getElementById('remitos-loading').style.display = 'none';
+
+    if (!ventas.length) { document.getElementById('remitos-empty').style.display = 'block'; return; }
+    document.getElementById('remitos-tbl').style.display = 'table';
+
+    document.getElementById('remitos-tbody').innerHTML = ventas.map(v => {
+      const unBadge = (v.unidad || '').toUpperCase().includes('ACERO') ?
+        '<span class="badge b-acero">Acero Inox</span>' : '<span class="badge b-abc">ABCTechos</span>';
+      const total = v.total ? '$' + Number(v.total).toLocaleString('es-AR') : '—';
+      return `<tr>
+        <td style="font-family:'DM Mono',monospace;font-weight:600">${v.numero}</td>
+        <td style="font-size:12px">${new Date(v.fecha).toLocaleDateString('es-AR')}</td>
+        <td>${v.clienteEmpresa || v.clienteNombre || '—'}</td>
+        <td>${unBadge}</td>
+        <td>${canalLabel(v.canal)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px">${total}</td>
+        <td>${estadoLabel(v.estado)}</td>
+        <td>
+          <button class="btn btn-sm btn-ghost" onclick="verRemito('${v.id}')">Ver</button>
+          <button class="btn btn-sm btn-ghost" onclick="imprimirPDF('${v.id}','${v.numero}')" style="margin-left:4px">🖨</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('remitos-loading').style.display = 'none';
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+// ── CLIENTES ────────────────────────────────────────────────────────────────
+async function loadClientes() {
+  document.getElementById('clientes-loading').style.display = 'block';
+  document.getElementById('clientes-tbl').style.display = 'none';
+
+  try {
+    const data = await apiFetch('/api/ventas?limit=200');
+    const ventas = data.ventas || [];
+    document.getElementById('clientes-loading').style.display = 'none';
+
+    const mapa = {};
+    ventas.forEach(v => {
+      const key = (v.clienteEmpresa || v.clienteNombre || '').toLowerCase();
+      if (!mapa[key]) mapa[key] = {
+        nombre: v.clienteNombre || '—',
+        empresa: v.clienteEmpresa || '—',
+        tel: v.clienteTel || '—',
+        email: v.clienteEmail || '—',
+        count: 0
+      };
+      mapa[key].count++;
+    });
+
+    const list = Object.values(mapa).sort((a,b) => b.count - a.count);
+    if (!list.length) { document.getElementById('clientes-empty').style.display = 'block'; return; }
+    document.getElementById('clientes-tbl').style.display = 'table';
+
+    document.getElementById('clientes-tbody').innerHTML = list.map(c => `
+      <tr>
+        <td style="font-weight:500">${c.nombre}</td>
+        <td style="color:var(--text2)">${c.empresa}</td>
+        <td style="font-size:12px">${c.tel}</td>
+        <td style="font-size:12px">${c.email}</td>
+        <td><span style="font-family:'DM Mono',monospace;font-size:12px">${c.count}</span></td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    document.getElementById('clientes-loading').style.display = 'none';
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+// ── NUEVA VENTA ──────────────────────────────────────────────────────────────
+function initNuevaVenta() {
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('nv-fecha').value = hoy;
+  if (!document.getElementById('items-tbody').children.length) addItem();
+}
+
+function setUnidad(u) {
+  selectedUnidad = u;
+  document.getElementById('tab-abc').classList.toggle('active', u === 'abc');
+  document.getElementById('tab-acero').classList.toggle('active', u === 'acero');
+}
+
+function addItem() {
+  itemCount++;
+  const tr = document.createElement('tr');
+  tr.id = 'item-' + itemCount;
+  tr.innerHTML = `
+    <td><input type="text" placeholder="Chapa sinusoidal 0.4mm..." style="width:100%"></td>
+    <td><input type="number" min="1" value="1" style="width:70px" oninput="calcTotal()"></td>
+    <td>
+      <select style="width:75px">
+        <option>un</option><option>m²</option><option>ml</option><option>kg</option><option>m</option>
+      </select>
+    </td>
+    <td><input type="number" min="0" value="0" placeholder="0" oninput="calcTotal()"></td>
+    <td class="item-total item-total-${itemCount}">$0</td>
+    <td><button onclick="removeItem(${itemCount})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;line-height:1">×</button></td>
+  `;
+  document.getElementById('items-tbody').appendChild(tr);
+}
+
+function removeItem(id) {
+  const el = document.getElementById('item-' + id);
+  if (el) el.remove();
+  calcTotal();
+}
+
+function calcTotal() {
+  let total = 0;
+  document.querySelectorAll('#items-tbody tr').forEach(tr => {
+    const nums = tr.querySelectorAll('input[type="number"]');
+    if (nums.length >= 2) {
+      const cant = parseFloat(nums[0].value) || 0;
+      const precio = parseFloat(nums[1].value) || 0;
+      const sub = cant * precio;
+      total += sub;
+      const id = tr.id.replace('item-', '');
+      const el = tr.querySelector('.item-total-' + id);
+      if (el) el.textContent = '$' + sub.toLocaleString('es-AR');
+    }
+  });
+  document.getElementById('nv-subtotal').textContent = '$' + total.toLocaleString('es-AR');
+}
+
+let logisticaTimeout = null;
+function debounceLogistica() {
+  clearTimeout(logisticaTimeout);
+  logisticaTimeout = setTimeout(calcLogistica, 600);
+}
+
+function calcLogistica() {
+  const provincia = document.getElementById('nv-provincia').value;
+  const canal = document.getElementById('nv-canal').value;
+  const panel = document.getElementById('logistica-panel');
+  if (!provincia) { panel.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:12px 0">Seleccioná la provincia para ver opciones.</div>'; return; }
+
+  if (canal === 'MERCADOLIBRE') {
+    panel.innerHTML = `
+      <div class="logistica-box">
+        <div class="lbl">Canal detectado</div>
+        <div class="val">Mercado Libre</div>
+        <div class="sub">Entregar en punto ML cercano a Santa Rosa 4025, Victoria, San Fernando</div>
+      </div>
+      <div class="logistica-box">
+        <div class="lbl">Transporte</div>
+        <div class="transport-opts">
+          <div class="transport-opt selected" onclick="selectTransport('correoml',this)">
+            <div class="t-icon">📦</div><div class="t-name">Correo ML</div><div class="t-detail">Punto ML Victoria</div>
+          </div>
+          <div class="transport-opt" onclick="selectTransport('hilux',this)">
+            <div class="t-icon">🛻</div><div class="t-name">Hilux</div><div class="t-detail">Entrega directa</div>
+          </div>
+        </div>
+      </div>`;
+    selectedTransport = 'correoml';
+    return;
+  }
+
+  const opts = TRANSPORT_RULES[provincia] || TRANSPORT_RULES.interior;
+  selectedTransport = opts[0].id;
+  const zonaLabel = { caba: 'Capital Federal', buenos_aires_gba: 'Gran Buenos Aires', interior: 'Interior del país' }[provincia];
+
+  let html = `<div class="logistica-box">
+    <div class="lbl">Zona detectada</div>
+    <div class="val">${zonaLabel}</div>
+  </div>
+  <div class="logistica-box">
+    <div class="lbl">Transporte recomendado</div>
+    <div class="transport-opts">
+    ${opts.map((t, i) => `
+      <div class="transport-opt ${i===0?'selected':''}" onclick="selectTransport('${t.id}',this)">
+        <div class="t-icon">${t.icon}</div>
+        <div class="t-name">${t.name}</div>
+        <div class="t-detail">${t.detail}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+
+  if (provincia === 'interior') {
+    html += '<div class="alert alert-info">Interior: verificar terminal de transporte más cercana al destino.</div>';
+  }
+
+  panel.innerHTML = html;
+}
+
+function selectTransport(id, el) {
+  selectedTransport = id;
+  el.closest('.transport-opts').querySelectorAll('.transport-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function getItems() {
+  const items = [];
+  document.querySelectorAll('#items-tbody tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    const sel = tr.querySelectorAll('select');
+    const desc = inputs[0]?.value?.trim();
+    const cant = parseFloat(inputs[1]?.value) || 0;
+    const unidad = sel[0]?.value || 'un';
+    const precio = parseFloat(inputs[2]?.value) || 0;
+    if (desc) items.push({ descripcion: desc, cantidad: cant, unidad, precioUnit: precio });
+  });
+  return items;
+}
+
+async function guardarVenta() {
+  const cliente = document.getElementById('nv-cliente').value.trim();
+  const dir = document.getElementById('nv-dir').value.trim();
+  const localidad = document.getElementById('nv-localidad').value.trim();
+  const provincia = document.getElementById('nv-provincia').value;
+
+  if (!cliente) { showToast('Ingresá el nombre del cliente', 'error'); return; }
+  if (!dir) { showToast('Ingresá la dirección de entrega', 'error'); return; }
+  if (!provincia) { showToast('Seleccioná la provincia', 'error'); return; }
+
+  const items = getItems();
+  if (!items.length) { showToast('Agregá al menos un producto', 'error'); return; }
+
+  const total = items.reduce((a, i) => a + i.cantidad * i.precioUnit, 0);
+  const transporteNombre = {
+    hilux: 'Flota propia — Hilux',
+    accelo: 'Flota propia — Accelo',
+    correoml: 'Correo Mercado Libre',
+    andreani: 'Andreani',
+    oca: 'OCA',
+    transporte: 'Transporte de carga'
+  }[selectedTransport] || selectedTransport || 'A definir';
+
+  const body = {
+    canal: document.getElementById('nv-canal').value || 'LOCAL',
+    unidad: selectedUnidad === 'abc' ? 'ABCTECHOS' : 'ACEROINOXIDABLES',
+    cliente: {
+      nombre: cliente,
+      empresa: document.getElementById('nv-empresa').value.trim() || undefined,
+      email: document.getElementById('nv-email').value.trim() || undefined,
+      tel: document.getElementById('nv-tel').value.trim() || undefined,
+    },
+    direccion: {
+      calle: dir,
+      localidad: localidad || 'A confirmar',
+      provincia: { caba: 'Capital Federal', buenos_aires_gba: 'Buenos Aires (GBA)', interior: 'Interior' }[provincia] || provincia,
+      cp: document.getElementById('nv-cp').value.trim() || undefined,
+    },
+    items,
+    total,
+    notas: document.getElementById('nv-notas').value.trim() || undefined,
+  };
+
+  try {
+    const venta = await apiFetch('/api/ventas', { method: 'POST', body: JSON.stringify(body) });
+    showToast('✓ Venta guardada: ' + venta.numero, 'success');
+    resetForm();
+    verRemito(venta.id);
+  } catch(e) {
+    showToast('Error al guardar: ' + e.message, 'error');
+  }
+}
+
+function resetForm() {
+  ['nv-cliente','nv-empresa','nv-tel','nv-email','nv-dir','nv-localidad','nv-cp','nv-notas'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('nv-provincia').value = '';
+  document.getElementById('nv-canal').value = 'LOCAL';
+  document.getElementById('items-tbody').innerHTML = '';
+  itemCount = 0;
+  document.getElementById('nv-subtotal').textContent = '$0';
+  document.getElementById('logistica-panel').innerHTML = '<div style="color:var(--text3);font-size:13px;padding:12px 0">Completá la dirección y provincia para ver opciones de envío.</div>';
+  selectedTransport = null;
+  addItem();
+}
+
+// ── VER REMITO ───────────────────────────────────────────────────────────────
+async function verRemito(id) {
+  currentRemitoVentaId = id;
+  try {
+    const venta = await apiFetch('/api/ventas/' + id);
+    document.getElementById('modal-remito-title').textContent = 'Remito ' + venta.numero;
+
+    const unNombre = (venta.unidad || '').toUpperCase().includes('ACERO') ? 'Acero Inoxidables' : 'ABCTechos';
+    const unWeb = (venta.unidad || '').toUpperCase().includes('ACERO') ? 'acerosinoxidables.com.ar' : 'abctechos.com';
+    const transLabel = {
+      'Flota propia — Hilux': 'Hilux (flota propia)',
+      'Flota propia — Accelo': 'Accelo (flota propia)',
+    }[venta.transporteNombre] || venta.transporteNombre || 'A definir';
+
+    const rows = (venta.items || []).map(i => `
+      <tr>
+        <td>${i.descripcion}</td>
+        <td>${i.cantidad} ${i.unidad || 'un'}</td>
+        <td style="text-align:right">$${Number(i.precioUnit || 0).toLocaleString('es-AR')}</td>
+        <td style="text-align:right;font-weight:600">$${Number(i.total || i.cantidad * i.precioUnit || 0).toLocaleString('es-AR')}</td>
+      </tr>`).join('');
+
+    const total = venta.total ? Number(venta.total).toLocaleString('es-AR') : '—';
+    const fecha = new Date(venta.fecha).toLocaleDateString('es-AR');
+
+    document.getElementById('modal-remito-body').innerHTML = `
+      <div class="remito-preview" id="remito-print-area">
+        <div class="remito-top">
+          <div>
+            <div class="remito-empresa">${unNombre}</div>
+            <div class="remito-sub">${unWeb}</div>
+            <div class="remito-sub">Santa Rosa 4025, Victoria, San Fernando</div>
+            <div class="remito-sub">CUIT: 33-71869015-9 · IVA Responsable Inscripto</div>
+          </div>
+          <div style="text-align:right">
+            <div class="remito-num">${venta.numero}</div>
+            <div class="remito-sub">Fecha: ${fecha}</div>
+            <div class="remito-sub">Canal: ${canalLabelPlain(venta.canal)}</div>
+          </div>
+        </div>
+        <div class="remito-grid">
+          <div>
+            <div class="remito-section-label">Cliente</div>
+            <div style="font-weight:600;font-size:13px">${venta.clienteEmpresa || venta.clienteNombre || '—'}</div>
+            ${venta.clienteEmpresa ? `<div style="font-size:12px;color:#666">${venta.clienteNombre}</div>` : ''}
+            ${venta.clienteTel ? `<div style="font-size:12px;color:#666">Tel: ${venta.clienteTel}</div>` : ''}
+            ${venta.clienteEmail ? `<div style="font-size:12px;color:#666">${venta.clienteEmail}</div>` : ''}
+          </div>
+          <div>
+            <div class="remito-section-label">Dirección de entrega</div>
+            <div style="font-size:13px">${venta.dirCalle || '—'}</div>
+            <div style="font-size:12px;color:#666">${[venta.dirLocalidad, venta.dirProvincia, venta.dirCP].filter(Boolean).join(' · ')}</div>
+            <div style="font-size:12px;margin-top:4px"><strong>Transporte:</strong> ${transLabel}</div>
+          </div>
+        </div>
+        <table class="remito-tbl">
+          <thead><tr><th>Descripción</th><th>Cantidad</th><th style="text-align:right">Precio unit.</th><th style="text-align:right">Total</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="remito-total">Total: $${total}</div>
+        ${venta.notas ? `<div style="margin-top:10px;font-size:12px;color:#666;border-top:1px solid #eee;padding-top:8px">Notas: ${venta.notas}</div>` : ''}
+      </div>
+    `;
+
+    document.getElementById('modal-remito').classList.add('open');
+  } catch(e) {
+    showToast('Error cargando remito: ' + e.message, 'error');
+  }
+}
+
+function imprimirRemito() {
+  const area = document.getElementById('remito-print-area');
+  if (!area) return;
+  const w = window.open('', '_blank');
+  w.document.write(`
+    <html><head><title>Remito</title>
+    <style>
+      body { font-family: 'DM Sans', Arial, sans-serif; padding: 20px; color: #111; }
+      * { box-sizing: border-box; }
+      .remito-preview { max-width: 700px; margin: 0 auto; }
+      .remito-top { display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid #ddd; margin-bottom: 14px; }
+      .remito-empresa { font-size: 15px; font-weight: 600; }
+      .remito-sub { font-size: 11px; color: #666; }
+      .remito-num { font-size: 18px; font-weight: 700; text-align: right; }
+      .remito-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+      .remito-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #999; letter-spacing: 0.5px; margin-bottom: 4px; }
+      .remito-tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0; }
+      .remito-tbl th { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #888; border-bottom: 1px solid #ddd; padding: 6px 8px; text-align: left; }
+      .remito-tbl td { padding: 8px 8px; border-bottom: 1px solid #eee; }
+      .remito-total { text-align: right; font-weight: 700; font-size: 15px; padding-top: 8px; border-top: 1px solid #ddd; }
+      @media print { body { padding: 0; } }
+    </style></head>
+    <body><div class="remito-preview">${area.innerHTML}</div></body></html>
+  `);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); }, 300);
+}
+
+async function imprimirPDF(id, numero) {
+  const url = `${API}/api/ventas/${id}/remito-pdf`;
+  window.open(url, '_blank');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function canalLabel(canal) {
+  const map = {
+    MERCADOLIBRE: '<span class="badge b-ml">ML</span>',
+    TIENDANUBE:   '<span class="badge b-tn">TN</span>',
+    WOOCOMMERCE:  '<span class="badge b-wc">WC</span>',
+    LOCAL:        '<span class="badge b-local">Local</span>',
+    WHATSAPP:     '<span class="badge b-local">WPP</span>',
+  };
+  return map[canal] || `<span class="badge b-local">${canal || '—'}</span>`;
+}
+
+function canalLabelPlain(canal) {
+  const map = { MERCADOLIBRE:'Mercado Libre', TIENDANUBE:'Tiendanube', WOOCOMMERCE:'WooCommerce', LOCAL:'Local', WHATSAPP:'WhatsApp' };
+  return map[canal] || canal || '—';
+}
+
+function estadoLabel(estado) {
+  const map = {
+    PENDIENTE: '<span class="badge b-pend">Pendiente</span>',
+    TRANSITO:  '<span class="badge b-trans">En tránsito</span>',
+    ENTREGADO: '<span class="badge b-entr">Entregado</span>',
+    CANCELADO: '<span class="badge" style="background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.25)">Cancelado</span>',
+  };
+  return map[(estado || '').toUpperCase()] || `<span class="badge b-local">${estado || '—'}</span>`;
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadDashboard();
+</script>
+</body>
+</html>
