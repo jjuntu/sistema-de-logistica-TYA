@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -352,7 +352,7 @@ const FL={PENDIENTE:['DESPACHADO','RETIRADO','CANCELADO'],DESPACHADO:['TRANSITO'
 const BC={DESPACHADO:'btn-blue',TRANSITO:'btn-blue',ENTREGADO:'btn-green',RETIRADO:'btn-green',CANCELADO:'btn-red',PENDIENTE:'btn-orange'};
 const TR={caba:[{id:'hilux',n:'Hilux',d:'Cargas livianas / urgente',i:'&#128667;'},{id:'accelo',n:'Accelo',d:'Cargas grandes / chapas',i:'&#128667;'}],buenos_aires_gba:[{id:'hilux',n:'Hilux',d:'Hasta ~30km, livianas',i:'&#128667;'},{id:'accelo',n:'Accelo',d:'GBA, cargas grandes',i:'&#128667;'}],interior:[{id:'andreani',n:'Andreani',d:'Paquetes hasta 30kg',i:'&#127297;'},{id:'oca',n:'OCA',d:'Env\u00edos nacionales',i:'&#128309;'},{id:'transporte',n:'Transporte de carga',d:'Cargas pesadas',i:'&#128666;'}]};
 
-let th=localStorage.getItem('th')||'dark';
+let th=localStorage.getItem('th')||'light';
 document.documentElement.setAttribute('data-theme',th);
 document.getElementById('thbtn').textContent=th==='dark'?'\u2600\uFE0E':'\u263E';
 function toggleTheme(){th=th==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',th);document.getElementById('thbtn').textContent=th==='dark'?'\u2600\uFE0E':'\u263E';localStorage.setItem('th',th);}
