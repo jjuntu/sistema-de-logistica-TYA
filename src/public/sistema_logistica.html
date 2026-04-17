@@ -177,7 +177,7 @@ table.tbl tbody tr:hover td{background:var(--bg3)}
 <aside class="sidebar">
   <div class="sb-brand">
     <div class="sb-row"><div class="sb-mark">&#127959;</div><div class="sb-name">SisLog&iacute;stica</div></div>
-    <div class="sb-sub">ABCTechos &middot; AceroInox</div>
+    <div class="sb-sub">ABC TECHOS &middot; AceroInox</div>
   </div>
   <nav class="nav">
     <button class="nb active" id="nav-dashboard" onclick="showPage('dashboard')"><span class="ni">&#9642;</span> Panel</button>
@@ -248,7 +248,7 @@ table.tbl tbody tr:hover td{background:var(--bg3)}
     <div class="content">
       <div class="fw">
         <div class="utabs">
-          <button class="utab ua active" id="tab-abc" onclick="setU('abc')">ABCTechos</button>
+          <button class="utab ua active" id="tab-abc" onclick="setU('abc')">ABC TECHOS</button>
           <button class="utab ub" id="tab-acero" onclick="setU('acero')">Acero Inoxidables</button>
         </div>
         <div class="fsec">Datos del cliente</div>
@@ -348,7 +348,7 @@ table.tbl tbody tr:hover td{background:var(--bg3)}
 const API='https://web-production-68d158.up.railway.app';
 let VA=null,selU='abc',selT=null,iC=0;
 const ES={PENDIENTE:{l:'Pendiente',c:'b-pendiente',i:'&#9203;'},DESPACHADO:{l:'Despachado',c:'b-despachado',i:'&#128230;'},TRANSITO:{l:'En tr\u00e1nsito',c:'b-transito',i:'&#128666;'},ENTREGADO:{l:'Entregado',c:'b-entregado',i:'&#9989;'},RETIRADO:{l:'Retirado en local',c:'b-retirado',i:'&#127978;'},CANCELADO:{l:'Cancelado',c:'b-cancelado',i:'&#10060;'}};
-const FL={PENDIENTE:['DESPACHADO','RETIRADO','CANCELADO'],DESPACHADO:['TRANSITO','ENTREGADO','CANCELADO'],TRANSITO:['ENTREGADO','CANCELADO'],ENTREGADO:[],RETIRADO:[],CANCELADO:['PENDIENTE']};
+const FL={PENDIENTE:['DESPACHADO','RETIRADO','CANCELADO'],DESPACHADO:['TRANSITO','ENTREGADO','PENDIENTE','CANCELADO'],TRANSITO:['ENTREGADO','DESPACHADO','CANCELADO'],ENTREGADO:['TRANSITO'],RETIRADO:[],CANCELADO:['PENDIENTE']};
 const BC={DESPACHADO:'btn-blue',TRANSITO:'btn-blue',ENTREGADO:'btn-green',RETIRADO:'btn-green',CANCELADO:'btn-red',PENDIENTE:'btn-orange'};
 const TR={caba:[{id:'hilux',n:'Hilux',d:'Cargas livianas / urgente',i:'&#128667;'},{id:'accelo',n:'Accelo',d:'Cargas grandes / chapas',i:'&#128667;'}],buenos_aires_gba:[{id:'hilux',n:'Hilux',d:'Hasta ~30km, livianas',i:'&#128667;'},{id:'accelo',n:'Accelo',d:'GBA, cargas grandes',i:'&#128667;'}],interior:[{id:'andreani',n:'Andreani',d:'Paquetes hasta 30kg',i:'&#127297;'},{id:'oca',n:'OCA',d:'Env\u00edos nacionales',i:'&#128309;'},{id:'transporte',n:'Transporte de carga',d:'Cargas pesadas',i:'&#128666;'}]};
 
@@ -376,7 +376,7 @@ async function api(path,opts={}){
 }
 
 function eb(estado){const e=ES[(estado||'PENDIENTE').toUpperCase()]||ES.PENDIENTE;return '<span class="badge '+e.c+'">'+e.i+' '+e.l+'</span>';}
-function ub(u){const x=(u||'').toUpperCase();return x.includes('ACERO')?'<span class="badge b-acero">Acero Inoxidables</span>':'<span class="badge b-abc">ABCTechos</span>';}
+function ub(u){const x=(u||'').toUpperCase();return x.includes('ACERO')?'<span class="badge b-acero">Acero Inoxidables</span>':'<span class="badge b-abc">ABC TECHOS</span>';}
 function cb(c){const m={MERCADOLIBRE:'<span class="badge b-ml">Mercado Libre</span>',TIENDANUBE:'<span class="badge b-tn">Tiendanube</span>',WOOCOMMERCE:'<span class="badge b-wc">WooCommerce</span>',WHATSAPP:'<span class="badge b-wpp">WhatsApp</span>',LOCAL:'<span class="badge b-local">Mostrador</span>',TELEFONO:'<span class="badge b-local">Tel&eacute;fono</span>'};return m[c]||'<span class="badge b-local">'+(c||'&mdash;')+'</span>';}
 function cp(c){const m={MERCADOLIBRE:'Mercado Libre',TIENDANUBE:'Tiendanube',WOOCOMMERCE:'WooCommerce',LOCAL:'Mostrador',WHATSAPP:'WhatsApp',TELEFONO:'Tel&eacute;fono'};return m[c]||c||'&mdash;';}
 function qa(v){
@@ -459,7 +459,7 @@ async function loadRemitos(){
     document.getElementById('rtbl').style.display='table';
     document.getElementById('rtbody').innerHTML=vs.map(v=>{
       const tot=v.total?'$'+Number(v.total).toLocaleString('es-AR'):'&mdash;';
-      const f=new Date(v.fecha).toLocaleDateString('es-AR');
+      const f=v.fecha?new Date(v.fecha).toLocaleDateString('es-AR'):'Sin fecha';
       return '<tr><td style="font-family:var(--mono);font-weight:600;font-size:12px">'+v.numero+'</td><td style="font-size:12px">'+f+'</td><td style="font-weight:500">'+(v.clienteEmpresa||v.clienteNombre||'&mdash;')+'</td><td>'+ub(v.unidad)+'</td><td>'+cb(v.canal)+'</td><td style="font-family:var(--mono);font-size:12px">'+tot+'</td><td>'+eb(v.estado)+'</td><td><div class="ag"><button class="btn btn-ghost btn-xs" onclick="verR(\''+v.id+'\')">&#128065; Ver</button><button class="btn btn-ghost btn-xs" onclick="window.open(\''+API+'/api/ventas/'+v.id+'/remito-pdf\',\'_blank\')">&#128196; PDF</button></div></td></tr>';
     }).join('');
   }catch(e){document.getElementById('rl').style.display='none';toast('Error: '+e.message,'err');}
@@ -485,10 +485,10 @@ async function verR(id){
   try{
     const v=await api('/api/ventas/'+id);
     VA=v;
-    document.getElementById('mt').textContent='Remito '+v.numero;
-    const un=(v.unidad||'').toUpperCase().includes('ACERO')?'Acero Inoxidables':'ABCTechos';
-    const uw=(v.unidad||'').toUpperCase().includes('ACERO')?'acerosinoxidables.com.ar':'abctechos.com';
-    const f=new Date(v.fecha).toLocaleDateString('es-AR');
+    document.getElementById('mt').textContent='Remito '+(v.numero||v.id||'');
+    const uraw=(v.unidad||v.canal||'').toUpperCase();const un=uraw.includes('ACERO')||uraw.includes('TIENDANUBE')?'Acero Inoxidables':'ABC TECHOS';
+    const uw=uraw.includes('ACERO')||uraw.includes('TIENDANUBE')?'acerosinoxidables.com.ar':'abctechos.com';
+    const f=v.fecha?new Date(v.fecha).toLocaleDateString('es-AR'):'Sin fecha';
     const rows=(v.items||[]).map(i=>'<tr><td>'+i.descripcion+'</td><td>'+i.cantidad+' '+(i.unidad||'un')+'</td><td style="text-align:right">$'+Number(i.precioUnit||0).toLocaleString('es-AR')+'</td><td style="text-align:right;font-weight:700">$'+Number(i.total||i.cantidad*i.precioUnit||0).toLocaleString('es-AR')+'</td></tr>').join('');
     document.getElementById('mb').innerHTML='<div class="rp" id="rprint"><div class="rpt"><div><div class="rpe">'+un+'</div><div class="rps">'+uw+' &middot; Santa Rosa 4025, Victoria</div><div class="rps">CUIT: 33-71869015-9 &middot; IVA Responsable Inscripto</div></div><div><div class="rpn">'+v.numero+'</div><div class="rps" style="text-align:right">Fecha: '+f+'</div><div class="rps" style="text-align:right">Canal: '+cp(v.canal)+'</div></div></div><div class="rpg"><div><div class="rpl">Cliente</div><div style="font-weight:700;font-size:13px">'+(v.clienteEmpresa||v.clienteNombre||'&mdash;')+'</div>'+(v.clienteEmpresa?'<div style="font-size:12px;color:#777">'+v.clienteNombre+'</div>':'')+(v.clienteTel?'<div style="font-size:12px;color:#777">Tel: '+v.clienteTel+'</div>':'')+(v.clienteEmail?'<div style="font-size:12px;color:#777">'+v.clienteEmail+'</div>':'')+'</div><div><div class="rpl">Direcci&oacute;n de entrega</div><div style="font-size:13px">'+(v.dirCalle||'&mdash;')+'</div><div style="font-size:12px;color:#777">'+[v.dirLocalidad,v.dirProvincia,v.dirCP].filter(Boolean).join(' &middot;')+'</div><div style="font-size:12px;margin-top:4px"><strong>Transporte:</strong> '+(v.transporteNombre||'A definir')+'</div></div></div><table class="rptbl"><thead><tr><th>Descripci&oacute;n</th><th>Cantidad</th><th style="text-align:right">Precio unit.</th><th style="text-align:right">Total</th></tr></thead><tbody>'+rows+'</tbody></table><div class="rptot">Total: $'+(v.total?Number(v.total).toLocaleString('es-AR'):'&mdash;')+'</div>'+(v.notas?'<div style="margin-top:10px;font-size:12px;color:#777;border-top:1px solid #eee;padding-top:8px">Notas: '+v.notas+'</div>':'')+'</div>';
     renderEB(v.id,v.estado);
