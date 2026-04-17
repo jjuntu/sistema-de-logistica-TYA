@@ -198,37 +198,77 @@ async function procesarOrdenWC({ orden }) {
   return procesarOrdenNormalizada(ordenNorm);
 }
 
-// Tiendanube
+// Tiendanube — el webhook manda solo {store_id, event, id}, hay que ir a buscar la orden completa
 async function procesarOrdenTN({ datos }) {
-  const orden    = datos.order || datos;
+  const token = process.env.TN_ACCESS_TOKEN;
+  const storeId = datos.store_id || process.env.TN_USER_ID;
+
+  if (!token) throw new Error('TN_ACCESS_TOKEN no configurado');
+  if (!storeId) throw new Error('store_id no recibido y TN_USER_ID no configurado');
+
+  const orderId = datos.id || datos.order?.id;
+  if (!orderId) throw new Error('order id no recibido en webhook TN');
+
+  // Fetch la orden completa desde la API de Tiendanube
+  const url = `https://api.tiendanube.com/v1/${storeId}/orders/${orderId}`;
+  logger.info(`TN: obteniendo orden completa desde ${url}`);
+
+  const { data: orden } = await axios.get(url, {
+    headers: {
+      'Authentication': `bearer ${token}`,
+      'User-Agent': 'ABCTechos Logistica (info@abctechos.com)'
+    }
+  });
+
+  logger.info(`TN orden ${orden.id} — status: ${orden.status}, payment: ${orden.payment_status}, total: ${orden.total}`);
+
   const cliente  = orden.customer || {};
   const shipping = orden.shipping_address || {};
 
+  // Armar direccion desde shipping_address
+  const calleCompleta = [
+    shipping.address,
+    shipping.number,
+    shipping.floor ? `piso ${shipping.floor}` : null
+  ].filter(Boolean).join(' ').trim();
+
   const dir = {
-    calle:     `${shipping.address || ''} ${shipping.number || ''}`.trim(),
-    localidad: shipping.city || '',
+    calle:     calleCompleta || 'A confirmar',
+    localidad: shipping.city || shipping.locality || '',
     provincia: normalizarProvincia(shipping.province || ''),
     cp:        shipping.zipcode || ''
   };
+
+  // Items: TN los llama "products"
+  const items = (orden.products || []).map(i => ({
+    descripcion: i.name || 'Producto',
+    cantidad:    parseFloat(i.quantity) || 1,
+    unidad:      'un',
+    precioUnit:  parseFloat(i.price) || 0
+  }));
+
+  // Nombre del cliente: primero intento customer.name, sino first+last del shipping
+  const nombreCliente = (
+    cliente.name ||
+    `${shipping.first_name || ''} ${shipping.last_name || ''}`.trim() ||
+    `${cliente.first_name || ''} ${cliente.last_name || ''}`.trim() ||
+    'Cliente TN'
+  );
 
   const ordenNorm = {
     canalExternoId: orden.id,
     canal:   'TIENDANUBE',
     unidad:  'ACEROINOXIDABLES',
     cliente: {
-      nombre:    `${cliente.name || ''}`.trim() || 'Cliente TN',
-      email:     cliente.email || null,
-      tel:       cliente.phone || null
+      nombre:    nombreCliente,
+      email:     cliente.email || orden.contact_email || null,
+      tel:       cliente.phone || shipping.phone || orden.contact_phone || null,
+      documento: cliente.identification || null
     },
     direccion: dir,
-    items: (orden.products || []).map(i => ({
-      descripcion: i.name,
-      cantidad:    i.quantity,
-      unidad:      'un',
-      precioUnit:  parseFloat(i.price) || 0
-    })),
+    items,
     total: parseFloat(orden.total) || 0,
-    notas: null
+    notas: orden.owner_note || null
   };
 
   return procesarOrdenNormalizada(ordenNorm);
